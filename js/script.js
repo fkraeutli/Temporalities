@@ -83,6 +83,8 @@ function make() {
 	
 	var container = d3.select( "body" )
 		.append( "svg" )
+		.attr( "width", 800 )
+		.attr( "height", 800 )
 		.append( "g" )
 		.attr( "transform", "translate( 10, 50 )" );
 		
@@ -136,29 +138,33 @@ function make() {
 			.range( p.radiusRange );
 	
 
+	layout.add()	
+		.nest( function( d ) {
+
+			return d.cycle_id;
+
+		} )
+		.date( function( d )  {
+			
+			return d.date_composed_to ? d.date_composed_from : new Date( d.date_composed_from.valueOf() + ( d.date_composed_to.valueOf() - d.date_composed_from.valueOf() ) / 2 );
+			
+		} )
+		.title(
+			
+			function( d ) {
+				
+				return d.cycle_name;
+				
+			}
+			
+		)
+		.range( p.radiusRange );
+		
+		
 	data = layout.build();
-	
-	/*
-		
-	var data = Temporalities
-		.add( cycles )
-		.add( poets )
-		.data( dataset );
-		
-		*/
-		
-		
-	
-	
-		
-		
-	/*	
-		
-	cyclesData = cycles( dataset );
-	poetsData = poets( dataset );
 		
 	var facets = container.selectAll( ".facet" )
-		.data( [ cyclesData, poetsData ] );
+		.data( data );
 			
 	facets.enter()
 		.append( "g" )
@@ -191,32 +197,39 @@ function make() {
 		
 	d3.selectAll( "g.entry" )
 		.on( "click", function( d ) { console.log( d.title ); } );
-		
-	var connections = Temporalities.connections()
-		.data( dataset );
-		
-	connectionsData = connections( [ cycles, poets ] );
 	
 	var links = container.append( "g" )
 			.attr( "id", "links" )
-		.selectAll( "g.link" )
-			.data( connectionsData)
+		.selectAll( "g.layers" )
+			.data( data)
 		.enter()
 			.append( "g" )
-			.attr( "class", "link" )
+			.attr( "class", "layer" )
+			.attr( "transform", function( d, i ) {
+				
+				return "translate( 0, " + i * p.view.facet.height + " )";
+				
+			} )
+		.selectAll( "g" )
+			.data( function( d ) { return d.filter( function( d ) { return d.connections && d.connections.length; } ); } )
+			.enter() 
+			.append( "g" )
+		.selectAll( "path" )
+			.data( function( d ) { return d.connections; } )
+			.enter()
 			.append( "path" )
 			.attr( "d", function ( d ) {
 				
 				var from = {
 						
-						x: d[ 0 ].x,
-						y: d[ 0 ].y + d[ 0 ].index * p.view.facet.height
+						x: d.x0,
+						y: d.y0 
 						
 					},
 					to = {
 						
-						x: d[ 1 ].x,
-						y: d[ 1 ].y + d[ 1 ].index * p.view.facet.height
+						x: d.x1,
+						y: d.y1 + p.view.facet.height
 						
 					},
 					via1 = {
@@ -240,7 +253,7 @@ function make() {
 				return lineFunction( [ from, via1, via2, to ] );
 			} );
 			
-	*/
+
 		
 		
 }
@@ -326,8 +339,10 @@ Temporalities = function() {
 						entry1.connections.push(
 							
 							{
-								x: entry2.x,
-								y: entry2.y,
+								x0: entry1.x,
+								y0: entry1.y,
+								x1: entry2.x,
+								y1: entry2.y,
 								index: i + 1
 							}
 							
