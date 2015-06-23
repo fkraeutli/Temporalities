@@ -86,7 +86,11 @@ function make() {
 		.append( "g" )
 		.attr( "transform", "translate( 10, 50 )" );
 		
-	cycles = Temporalities.set()
+	layout = new Temporalities();
+	
+	layout.data( dataset );
+	
+	layout.add()	
 		.nest( function( d ) {
 
 			return d.cycle_id;
@@ -106,31 +110,49 @@ function make() {
 			}
 			
 		)
-		.width( p.view.width )
 		.range( p.radiusRange );
 		
-	poets = Temporalities.set()
+	layout.add()
 		.nest( function( d ) {
-
-			return d.author_id;
-
-		} )
-		.date( function( d )  {
-			
-			return d.date_poet;
-			
-		} )
-		.title(
-			
-			function( d ) {
+		
+				return d.author_id;
+		
+			} )
+			.date( function( d )  {
 				
-				return d.author_name;
+				return d.date_poet;
 				
-			}
-			
-		)
-		.width( p.view.width )
-		.range( p.radiusRange );
+			} )
+			.title(
+				
+				function( d ) {
+					
+					return d.author_name;
+					
+				}
+				
+			)
+			.width( p.view.width )
+			.range( p.radiusRange );
+	
+
+	data = layout.build();
+	
+	/*
+		
+	var data = Temporalities
+		.add( cycles )
+		.add( poets )
+		.data( dataset );
+		
+		*/
+		
+		
+	
+	
+		
+		
+	/*	
 		
 	cyclesData = cycles( dataset );
 	poetsData = poets( dataset );
@@ -217,13 +239,121 @@ function make() {
 						
 				return lineFunction( [ from, via1, via2, to ] );
 			} );
+			
+	*/
 		
 		
 }
 
 Temporalities = function() {
 	
-	var id = 0;
+	if ( ! Temporalities.id ) Temporalities.id = 0;
+	
+	var id = Temporalities.id++,
+		data,
+		sets = [];
+
+	this.add = function() {
+		
+		var set = Temporalities.set();
+		
+		sets.push( set );
+		
+		return set;
+		
+	};
+	
+	
+	this.build = function() {
+		
+		return build();
+		
+	};
+	
+	this.data = function( _x ) {
+			
+		if ( ! arguments.length ) return data;
+		
+		data = _x;
+		return this;
+		
+	};
+	
+	this.sets = function() {
+		
+		return sets;
+		
+	};
+	
+	this.id = function() {
+		
+		return id;
+		
+	};
+	
+	function build() {
+		
+		function buildConnections( sets ) {	
+					
+			for ( var i = 0; i < sets.length - 1; i++ ) {
+				
+				var set1 = sets[ i ],
+					set2 = sets[ i + 1 ],
+					setsData1 = setsData[ i ],
+					setsData2 = setsData[ i + 1 ];
+				
+				var links = [];
+					
+				for ( var j = 0; j < data.length; j++ ) {
+					
+					var record = data[ j ];
+					
+					var s = set1.nest()( record ) + "," + set2.nest()( record );
+	
+					if ( links.indexOf( s ) == -1 ) {
+					
+						links.push( s );
+						
+						var entry1 = setsData1.filter( function( d ) { return d.key == set1.nest()( record ); } )[ 0 ],
+							entry2 = setsData2.filter( function( d ) { return d.key == set2.nest()( record ); } )[ 0 ];
+						
+						if ( ! entry1.connections ) {
+							
+							entry1.connections = [];
+							
+						}
+						
+						entry1.connections.push(
+							
+							{
+								x: entry2.x,
+								y: entry2.y,
+								index: i + 1
+							}
+							
+						);
+						
+					}
+					
+				}
+					
+			}
+					
+		}
+
+		var setsData = [];
+		
+		for( var i = 0; i < sets.length; i++ ) {
+		
+			setsData.push( sets[ i ].build( data ) );
+			
+		}
+		
+		buildConnections( sets );
+		
+		return setsData;
+		
+	}
 	
 };
 
@@ -231,28 +361,19 @@ Temporalities.set = function() {
 	
 	if( ! Temporalities.set.id ) Temporalities.set.id = 0;
 		
-	var data,
-		date,
+	var date,
 		nest,
 		range = [ 2, 10 ],
-		rawData,
 		title,
 		width = 600,
-		xScale;
+		xScale,
+		me = {};
 
 	Temporalities.set.id++;
 	
-	function me( data ) {
+	me.build = function( data ) {
 	
-		return build( data );
 		
-	}
-	
-	function build( input ) {
-		
-		rawData = input;
-		data = input;
-	
 		if ( ! xScale ) {
 			
 			xScale = d3.scale.linear()
@@ -289,16 +410,9 @@ Temporalities.set = function() {
 		data.sort( function( a, b ) { return  b.r - a.r; } );
 		
 		_arrange( data );
+		
 			
 		return data;
-		
-	}
-	
-	me.data = function() {
-			
-		if ( ! arguments.length ) return data;
-		
-		return me;
 		
 	};
 	
@@ -422,97 +536,4 @@ Temporalities.set = function() {
 	
 	return me;
 
-};
-
-Temporalities.connections = function() {
-	
-	var dataset;
-	
-	function me( sets ) {
-		
-		return build( sets );		
-	}
-	
-	function build( sets ) {
-		
-		data = [];
-				
-		for ( var i = 0; i < sets.length - 1; i++ ) {
-			
-			var set1 = sets[ i ],
-				set2 = sets[ i + 1 ];
-			
-			var links = [];
-				
-			for ( var j = 0; j < dataset.length; j++ ) {
-				
-				var record = dataset[ j ];
-				
-				var s = set1.nest()( record ) + "," + set2.nest()( record );
-
-				if ( links.indexOf( s ) == -1 ) {
-				
-					links.push( s );
-					
-					var entry1 = set1.data().filter( function( d ) { return d.key == set1.nest()( record ); } )[ 0 ],
-						entry2 = set2.data().filter( function( d ) { return d.key == set2.nest()( record ); } )[ 0 ];
-					
-					entry1.index = i;
-					entry2.index = i + 1;	
-						
-					data.push( [ entry1, entry2	] );
-
-					
-				}
-			}
-		
-			return data;	
-				
-		}
-		
-			
-			/*
-		for ( var i = 0; i < dataset.length; i++ ) {
-			
-			var record = dataset[ i ];
-			
-			var s = work.cycle_id + "," + work.author_id;
-			
-			if ( connections.indexOf( s ) == -1 ) {
-				
-				connections.push( s );
-				
-				var author = p.data.poets.filter( function ( d ) { return d.key == work.author_id; } )[ 0 ],
-					cycle =  p.data.cycles.filter( function ( d ) { return d.key == work.cycle_id; } )[ 0 ];
-					
-				if ( author && cycle ) {
-									
-					p.data.poetsToCycles.push( { 
-					
-						author: author, 
-									
-						cycle: cycle,
-						
-						selections: [] 
-						
-					} );
-				}
-				
-			}*/
-			
-	}
-
-
-	
-	me.data = function( _x ) {
-			
-		if ( ! arguments.length ) return dataset;
-		
-		dataset = _x;
-		return me;
-		
-	};
-	
-	return me;
-	
 };
