@@ -81,18 +81,18 @@ d3.csv( "../brittenpoets/works_and_poets.csv", function( data ) {
 
 function make() {
 	
-	var container = d3.select( "body" )
+	p.container = d3.select( "body" )
 		.append( "svg" )
 		.attr( "width", 800 )
 		.attr( "height", 800 )
 		.append( "g" )
 		.attr( "transform", "translate( 10, 50 )" );
 		
-	layout = new Temporalities();
+	p.layout = new Temporalities();
 	
-	layout.data( dataset );
+	p.layout.data( dataset );
 	
-	layout.add()	
+	p.layout.cycles = p.layout.add()	
 		.nest( function( d ) {
 
 			return d.cycle_id;
@@ -113,103 +113,116 @@ function make() {
 			
 		)
 		.range( p.radiusRange );
-		
-	layout.add()
+				
+	p.layout.poets = p.layout.add()
 		.nest( function( d ) {
 		
 				return d.author_id;
 		
 			} )
-			.date( function( d )  {
-				
-				return d.date_poet;
-				
-			} )
-			.title(
-				
-				function( d ) {
-					
-					return d.author_name;
-					
-				}
-				
-			)
-			.width( p.view.width )
-			.range( p.radiusRange );
-	
-
-	layout.add()	
-		.nest( function( d ) {
-
-			return d.cycle_id;
-
-		} )
 		.date( function( d )  {
 			
-			return d.date_composed_to ? d.date_composed_from : new Date( d.date_composed_from.valueOf() + ( d.date_composed_to.valueOf() - d.date_composed_from.valueOf() ) / 2 );
+			return d.date_poet;
 			
 		} )
 		.title(
 			
 			function( d ) {
 				
-				return d.cycle_name;
+				return d.author_name;
 				
 			}
 			
 		)
+		.width( p.view.width )
 		.range( p.radiusRange );
 		
-		
-	data = layout.build();
-		
-	var perspectives = container.selectAll( ".perspective" )
-		.data( data );
+	update();
+	
+}
+
+function update() {
+	
+	var perspectives = p.container.selectAll( ".perspective" )
+		.data( p.layout.build() );
 			
 	perspectives.enter()
 		.append( "g" )
-		.attr( "class", "perspective" )
-		.attr( "transform", function( d, i ) {
+		.attr( "class", "perspective" );
+		
+	perspectives.attr( "transform", function( d, i ) {
 			
-			return "translate( 0, " + i * p.view.perspective.height + " )";
-			
-		} );
+		return "translate( 0, " + i * p.view.perspective.height + " )";
+		
+	} );
 	
 	var entries = perspectives.selectAll( "g.entry" )
 		.data( function( d ) { 
 			
 			return d.filter( function(d) { return d.x; } ); 
 			
-		} )
-		.enter()
-	.append( "g" )
+		} );
+		
+	var entriesEnter = entries.enter()
+		.append( "g" )
 		.attr( "class", "entry" )
+		.attr( "id", function( d ) { 
+			
+			return "entry_" + d.set_id + "_" + d.key;
+			
+		} )
 		.on( "click", function( d ) { console.log( d ); } );
 		
 	
-	entries.append( "circle" )
-		.attr( "r", function( d ) {
+	entriesEnter.append( "circle" )
+		.attr( "class", "entry" );
+		
+	entriesEnter.append( "g" )
+		.attr( "class", "connections" );
+	
+	entries.selectAll( "circle.entry" )
+		.transition()
+		.duration( 1000 )
+		.attr( "r", function() {
 			
+			var d = d3.select(this.parentNode).datum();
+				
 			return d.r;
 			
 		} )
-		.attr( "cx", function( d ) { 
+		.attr( "cx", function() { 
+			
+			var d = d3.select(this.parentNode).datum();
 			
 			return d.x;
 			
 		} )
-		.attr( "cy", function( d ) { 
+		.attr( "cy", function() { 
 			
+			var d = d3.select(this.parentNode).datum();
+				
 			return d.y;
 			
 		} );
 		
-	entries.append( "g" )
-		.attr( "class", "connections" )
-	.selectAll( "path" )
-		.data( function( d ) { return d.connections && d.connections.length ? d.connections : []; } )
-		.enter()
-		.append( "path" )
+	entries.exit().remove();
+		
+	var connections = entries.selectAll( "g.connections" )
+		.selectAll( "path" )
+		.data( function( ) { 
+				 
+				var d = d3.select(this.parentNode.parentNode).datum();
+				
+				return d.connections && d.connections.length ? d.connections : []; 
+				
+		} );
+	
+	connections.enter()
+		.append( "path" );
+		
+	connections
+		.transition()
+		.duration( 1000 )
 		.attr( "d", function ( d ) {
 			
 			var from = {
@@ -243,7 +256,10 @@ function make() {
 					.interpolate( "basis" );
 					
 			return lineFunction( [ from, via1, via2, to ] );
+			
 		} );		
+	
+	connections.exit().remove();
 		
 }
 
@@ -253,13 +269,19 @@ Temporalities = function() {
 	
 	var id = Temporalities.id++,
 		data,
-		sets = [];
+		sets = [],
+		setsData = [],
+		updated = false;
 
 	this.add = function() {
 		
 		var set = Temporalities.set();
 		
+		set.parent = this;
+		
 		sets.push( set );
+		
+		this.flagUpdated();
 		
 		return set;
 		
@@ -268,7 +290,7 @@ Temporalities = function() {
 	
 	this.build = function() {
 		
-		return build();
+		return _build();
 		
 	};
 	
@@ -277,7 +299,16 @@ Temporalities = function() {
 		if ( ! arguments.length ) return data;
 		
 		data = _x;
+		
+		this.flagUpdated();
+		
 		return this;
+		
+	};
+	
+	this.flagUpdated = function() {
+		
+		updated = true;
 		
 	};
 	
@@ -292,8 +323,8 @@ Temporalities = function() {
 		return id;
 		
 	};
-	
-	function build() {
+	 
+	function _build() {
 		
 		function buildConnections( sets ) {	
 					
@@ -311,7 +342,7 @@ Temporalities = function() {
 					var record = data[ j ];
 					
 					var s = set1.nest()( record ) + "," + set2.nest()( record );
-	
+					
 					if ( links.indexOf( s ) == -1 ) {
 					
 						links.push( s );
@@ -344,22 +375,31 @@ Temporalities = function() {
 					}
 					
 				}
-					
+				
 			}
-					
 		}
-
-		var setsData = [];
-		
-		for( var i = 0; i < sets.length; i++ ) {
-		
-			setsData.push( sets[ i ].build( data ) );
+					
+		if ( _hasUpdated() ) {			
+	
+			setsData = [];
+			
+			for( var i = 0; i < sets.length; i++ ) {
+			
+				setsData.push( sets[ i ].build( data ) );
+				
+			}
+			
+			buildConnections( sets );
 			
 		}
 		
-		buildConnections( sets );
-		
 		return setsData;
+		
+	}
+	
+	function _hasUpdated() {
+		
+		return updated;
 		
 	}
 	
@@ -410,7 +450,7 @@ Temporalities.set = function() {
 			entry.y = 0;
 			entry.r = rScale( entry.values.length );
 			
-			entry.id = Temporalities.set.id;
+			entry.set_id = Temporalities.set.id;
 
 			
 		}
@@ -470,6 +510,9 @@ Temporalities.set = function() {
 		if ( ! arguments.length ) return width;
 		
 		width = _x;
+		
+		_flagUpdated();
+		
 		return me;
 		
 	};
@@ -479,6 +522,9 @@ Temporalities.set = function() {
 		if ( ! arguments.length ) return xScale;
 		
 		xScale = _x;
+		
+		_flagUpdated();
+		
 		return me;
 		
 	};
@@ -539,6 +585,16 @@ Temporalities.set = function() {
 	
 		}
 		
+		
+	}
+	
+	function _flagUpdated() {
+		
+		if ( me.parent ) {
+		
+			me.parent.flagUpdated();
+		
+		}
 		
 	}
 	
