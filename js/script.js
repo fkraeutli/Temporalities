@@ -9,7 +9,7 @@ var p = {
 		width: 600,
 		height: 800,
 		
-		facet: {
+		perspective: {
 			
 			height: 150
 			
@@ -163,19 +163,19 @@ function make() {
 		
 	data = layout.build();
 		
-	var facets = container.selectAll( ".facet" )
+	var perspectives = container.selectAll( ".perspective" )
 		.data( data );
 			
-	facets.enter()
+	perspectives.enter()
 		.append( "g" )
-		.attr( "class", "facet" )
+		.attr( "class", "perspective" )
 		.attr( "transform", function( d, i ) {
 			
-			return "translate( 0, " + i * p.view.facet.height + " )";
+			return "translate( 0, " + i * p.view.perspective.height + " )";
 			
 		} );
 	
-	facets.selectAll( "g.entry" )
+	perspectives.selectAll( "g.entry" )
 		.data( function( d ) { 
 			
 			return d.filter( function(d) { return d.x; } ); 
@@ -207,7 +207,7 @@ function make() {
 			.attr( "class", "layer" )
 			.attr( "transform", function( d, i ) {
 				
-				return "translate( 0, " + i * p.view.facet.height + " )";
+				return "translate( 0, " + i * p.view.perspective.height + " )";
 				
 			} )
 		.selectAll( "g" )
@@ -229,7 +229,7 @@ function make() {
 					to = {
 						
 						x: d.x1,
-						y: d.y1 + p.view.facet.height
+						y: d.y1 + p.view.perspective.height
 						
 					},
 					via1 = {
