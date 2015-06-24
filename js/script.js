@@ -175,86 +175,75 @@ function make() {
 			
 		} );
 	
-	perspectives.selectAll( "g.entry" )
+	var entries = perspectives.selectAll( "g.entry" )
 		.data( function( d ) { 
 			
 			return d.filter( function(d) { return d.x; } ); 
+			
 		} )
 		.enter()
 	.append( "g" )
 		.attr( "class", "entry" )
-		.attr( "transform", function( d ) {
-			
-			return "translate(" + d.x + ", " + d.y + " )";
-			
-		} )
-	.append( "circle" )
+		.on( "click", function( d ) { console.log( d ); } );
+		
+	
+	entries.append( "circle" )
 		.attr( "r", function( d ) {
 			
 			return d.r;
 			
+		} )
+		.attr( "cx", function( d ) { 
+			
+			return d.x;
+			
+		} )
+		.attr( "cy", function( d ) { 
+			
+			return d.y;
+			
 		} );
 		
-	d3.selectAll( "g.entry" )
-		.on( "click", function( d ) { console.log( d ); } );
-	
-	var links = container.append( "g" )
-			.attr( "id", "links" )
-		.selectAll( "g.layers" )
-			.data( data)
+	entries.append( "g" )
+		.attr( "class", "connections" )
+	.selectAll( "path" )
+		.data( function( d ) { return d.connections && d.connections.length ? d.connections : []; } )
 		.enter()
-			.append( "g" )
-			.attr( "class", "layer" )
-			.attr( "transform", function( d, i ) {
-				
-				return "translate( 0, " + i * p.view.perspective.height + " )";
-				
-			} )
-		.selectAll( "g" )
-			.data( function( d ) { return d.filter( function( d ) { return d.connections && d.connections.length; } ); } )
-			.enter() 
-			.append( "g" )
-		.selectAll( "path" )
-			.data( function( d ) { return d.connections; } )
-			.enter()
-			.append( "path" )
-			.attr( "d", function ( d ) {
-				
-				var from = {
-						
-						x: d.x0,
-						y: d.y0 
-						
-					},
-					to = {
-						
-						x: d.x1,
-						y: d.y1 + p.view.perspective.height
-						
-					},
-					via1 = {
-					
-						x: from.x + ( to.x - from.x ) * 0.25,
-						y: from.y + ( to.y - from.y ) * 0.33
-						
-					};
-					via2 = {
-					
-						x: from.x + ( to.x - from.x ) * 0.75,
-						y: from.y + ( to.y - from.y ) * 0.66
-						
-					};
-				
-				var lineFunction = d3.svg.line()
-						.x( function ( d ) { return d.x; } )
-						.y( function ( d ) { return d.y; } )
-						.interpolate( "basis" );
-						
-				return lineFunction( [ from, via1, via2, to ] );
-			} );
+		.append( "path" )
+		.attr( "d", function ( d ) {
 			
-
-		
+			var from = {
+					
+					x: d.x0,
+					y: d.y0 
+					
+				},
+				to = {
+					
+					x: d.x1,
+					y: d.y1 + p.view.perspective.height
+					
+				},
+				via1 = {
+				
+					x: from.x + ( to.x - from.x ) * 0.25,
+					y: from.y + ( to.y - from.y ) * 0.33
+					
+				};
+				via2 = {
+				
+					x: from.x + ( to.x - from.x ) * 0.75,
+					y: from.y + ( to.y - from.y ) * 0.66
+					
+				};
+			
+			var lineFunction = d3.svg.line()
+					.x( function ( d ) { return d.x; } )
+					.y( function ( d ) { return d.y; } )
+					.interpolate( "basis" );
+					
+			return lineFunction( [ from, via1, via2, to ] );
+		} );		
 		
 }
 
