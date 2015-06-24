@@ -137,6 +137,8 @@ function make() {
 		.width( p.view.width )
 		.range( p.radiusRange );
 		
+	
+		
 	update();
 	
 }
@@ -177,41 +179,82 @@ function update() {
 	entriesEnter.append( "circle" )
 		.attr( "class", "entry" );
 		
+		entries.on( "mouseover", function( d ) {
+			
+			function highlightConnections( d ) {
+				
+				if ( d.connections && d.connections.length ) {
+					for ( var i = 0; i < d.connections.length; i++ ) {
+					
+						d3.select( "#entry_" + d.connections[ i ].target.set_id + "_" + d.connections[ i ].target.key)
+						.classed( "selected", true );
+						
+						highlightConnections( d.connections[ i ].target );
+						
+					}	
+				}
+			}
+			
+			function highlightIncoming( d ) {
+				
+				if ( d.incoming && d.incoming.length ) {
+				
+					for ( var i = 0; i < d.incoming.length; i++ ) {
+					
+						d3.select( "#entry_" + d.incoming[ i ].set_id + "_" + d.incoming[ i ].key)
+							.classed( "selected", true );
+							
+						highlightIncoming( d.incoming[ i ] );
+						
+					}
+					
+				}
+				
+			}
+			
+			d3.select( this ).classed( "selected", true );
+			
+			highlightIncoming( d );
+			highlightConnections( d );			
+			
+		} )
+		.on( "mouseout", function( d ) { 
+			
+			d3.selectAll( ".selected" )
+				.classed( "selected", false );
+			
+		} );
+		
 	entriesEnter.append( "g" )
 		.attr( "class", "connections" );
 	
-	entries.selectAll( "circle.entry" )
+	entries.select( "circle.entry" )
 		.transition()
 		.duration( 1000 )
-		.attr( "r", function() {
+		.attr( "r", function( d ) {
 			
-			var d = d3.select(this.parentNode).datum();
-				
 			return d.r;
 			
 		} )
-		.attr( "cx", function() { 
-			
-			var d = d3.select(this.parentNode).datum();
+		.attr( "cx", function( d ) { 
 			
 			return d.x;
 			
 		} )
-		.attr( "cy", function() { 
+		.attr( "cy", function( d ) { 
 			
-			var d = d3.select(this.parentNode).datum();
-				
 			return d.y;
 			
 		} );
 		
 	entries.exit().remove();
+			
 		
 	var connections = entries.selectAll( "g.connections" )
 		.selectAll( "path" )
 		.data( function( ) { 
 				 
-				var d = d3.select(this.parentNode.parentNode).datum();
+				var d = d3.select( this.parentNode.parentNode ).datum();
 				
 				return d.connections && d.connections.length ? d.connections : []; 
 				
@@ -356,6 +399,12 @@ Temporalities = function() {
 							
 						}
 						
+						if ( ! entry2.incoming ) {
+							
+							entry2.incoming = [];
+							
+						}
+						
 						if ( entry1.x && entry2.x && entry1.y && entry2.y ) {
 						
 							entry1.connections.push(
@@ -365,10 +414,13 @@ Temporalities = function() {
 									y0: entry1.y,
 									x1: entry2.x,
 									y1: entry2.y,
-									index: i + 1
+									index: i + 1,
+									target: entry2
 								}
 								
 							);
+							
+							entry2.incoming.push( entry1 );
 							
 						}
 						
@@ -415,9 +467,8 @@ Temporalities.set = function() {
 		title,
 		width = 600,
 		xScale,
-		me = {};
-
-	Temporalities.set.id++;
+		me = {},
+		id = Temporalities.set.id++;
 	
 	me.build = function( data ) {
 	
@@ -450,7 +501,7 @@ Temporalities.set = function() {
 			entry.y = 0;
 			entry.r = rScale( entry.values.length );
 			
-			entry.set_id = Temporalities.set.id;
+			entry.set_id = id;
 
 			
 		}
@@ -475,7 +526,7 @@ Temporalities.set = function() {
 	
 	me.id = function() {
 		
-		return Temporalities.set.id;
+		return id;
 		
 	};
 	

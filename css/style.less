@@ -1,9 +1,49 @@
+@colorBG: #222;
 
+body {
+	
+	background: @colorBG;
+	
+}
+
+
+.selected {
+	
 	path {
 		
-		fill: none;
-		stroke: black;
-		opacity: .1;
+		//stroke: red;
 		
 	}
 	
+}
+
+.entry {
+	
+	&.selected {
+		
+		circle.entry {
+		
+			fill: yellow;
+		
+		}
+	}
+	
+	circle.entry {
+		
+		fill: #bbb;
+		
+	}
+	
+	.connections {		
+			
+		path {
+			
+			fill: none;
+			stroke: white;
+			opacity: .1;
+			pointer-events: none;
+			
+		}
+		
+	}
+}

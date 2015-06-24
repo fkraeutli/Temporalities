@@ -1,5 +1,15 @@
-path {
+body {
+  background: #222222;
+}
+.entry.selected circle.entry {
+  fill: yellow;
+}
+.entry circle.entry {
+  fill: #bbb;
+}
+.entry .connections path {
   fill: none;
-  stroke: black;
+  stroke: white;
   opacity: .1;
+  pointer-events: none;
 }
