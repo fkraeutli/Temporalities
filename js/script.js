@@ -196,7 +196,7 @@ function make() {
 		} );
 		
 	d3.selectAll( "g.entry" )
-		.on( "click", function( d ) { console.log( d.title ); } );
+		.on( "click", function( d ) { console.log( d ); } );
 	
 	var links = container.append( "g" )
 			.attr( "id", "links" )
@@ -336,17 +336,21 @@ Temporalities = function() {
 							
 						}
 						
-						entry1.connections.push(
+						if ( entry1.x && entry2.x && entry1.y && entry2.y ) {
+						
+							entry1.connections.push(
+								
+								{
+									x0: entry1.x,
+									y0: entry1.y,
+									x1: entry2.x,
+									y1: entry2.y,
+									index: i + 1
+								}
+								
+							);
 							
-							{
-								x0: entry1.x,
-								y0: entry1.y,
-								x1: entry2.x,
-								y1: entry2.y,
-								index: i + 1
-							}
-							
-						);
+						}
 						
 					}
 					
