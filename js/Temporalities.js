@@ -187,7 +187,7 @@ Temporalities.set = function() {
 			var entry = data[ i ];
 			
 			entry.title = title( entry.values[ 0 ] );
-			entry.date = d3.min( entry.values, date );
+			entry.date = d3.mean( entry.values, date ); // make this average or mean
 			
 			entry.x = xScale( entry.date );
 			entry.y = 0;

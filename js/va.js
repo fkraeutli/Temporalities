@@ -122,34 +122,7 @@ function make() {
 		)
 		.range( p.radiusRange )
 		.width( p.view.width );
-				
-/*
-	p.layout.poets = p.layout.add()
-		.nest( function( d ) {
-		
-				return d.author_id;
-		
-			} )
-		.date( function( d )  {
-			
-			return d.date_poet;
-			
-		} )
-		.title(
-			
-			function( d ) {
-				
-				return d.author_name;
-				
-			}
-			
-		)
-		.width( p.view.width )
-		.range( p.radiusRange );
-		
-	
-*/
-		
+						
 	update();
 	
 }
@@ -193,9 +166,19 @@ function update() {
 		.attr( "class", "entry" );
 		
 	var entriesEnterLabels = entriesEnter.append( "g" )
-		.attr( "class", "label" );
+		.attr( "class", "label" )
+		.attr( "transform", function( d ) { 
+			
+			return "translate( " + d.x + ", " + d.y + " )";
+			
+		} );
 		
 	entriesEnterLabels.append( "text" )
+		.attr( "y", function( d ) {
+			
+			return -d.r - 10;
+			
+		} )
 		.html( function( d ) {
 			
 			return d.title;
@@ -208,8 +191,8 @@ function update() {
 				
 				if ( d.connections && d.connections.length ) {
 					for ( var i = 0; i < d.connections.length; i++ ) {
-					
-						d3.select( "#entry_" + d.connections[ i ].target.set_id + "_" + d.connections[ i ].target.key.replace(/\W+/g, " "))
+				
+						d3.select( "#entry_" + d.connections[ i ].target.set_id + "_" + d.connections[ i ].target.key.replace(/\W+/g, ""))
 						.classed( "selected", true );
 						
 						highlightConnections( d.connections[ i ].target );
@@ -224,7 +207,8 @@ function update() {
 				
 					for ( var i = 0; i < d.incoming.length; i++ ) {
 					
-						d3.select( "#entry_" + d.incoming[ i ].set_id + "_" + d.incoming[ i ].key.replace(/\W+/g, " "))
+					
+						d3.select( "#entry_" + d.incoming[ i ].set_id + "_" + d.incoming[ i ].key.replace(/\W+/g, ""))
 							.classed( "selected", true );
 							
 						highlightIncoming( d.incoming[ i ] );

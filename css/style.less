@@ -3,9 +3,17 @@
 body {
 	
 	background: @colorBG;
+	font-family: sans-serif;
+	font-size: 10px;
 	
 }
 
+text {
+	
+	fill: white;
+	pointer-events: none;
+	
+}
 
 .selected {
 	
@@ -26,11 +34,23 @@ body {
 			fill: yellow;
 			.transition();
 		}
+		
+		g.label {
+			
+			display: block;
+			
+		}
 	}
 	
 	circle.entry {
 		
 		fill: #bbb;
+		
+	}
+	
+	g.label {
+		
+		display: none;
 		
 	}
 	
