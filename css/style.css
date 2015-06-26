@@ -3,6 +3,10 @@ body {
 }
 .entry.selected circle.entry {
   fill: yellow;
+  transition: 0.2s all linear;
+  -webkit-transition: 0.2s all linear;
+  -moz-transition: 0.2s all linear;
+  -o-transition: 0.2s all linear;
 }
 .entry circle.entry {
   fill: #bbb;

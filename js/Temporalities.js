@@ -182,7 +182,6 @@ Temporalities.set = function() {
 			.domain( [ 1, d3.max( data, function( d ) { return d.values.length; } ) ] )
 			.range( range );
 			
-			
 		for ( var i = 0; i < data.length; i++ ) {
 			
 			var entry = data[ i ];

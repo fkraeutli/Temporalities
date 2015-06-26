@@ -24,7 +24,7 @@ body {
 		circle.entry {
 		
 			fill: yellow;
-		
+			.transition();
 		}
 	}
 	
@@ -46,4 +46,14 @@ body {
 		}
 		
 	}
+}
+
+
+.transition( @duration: .2s, @property: all, @easing: linear ) {
+	
+	transition: @duration @property @easing;
+	-webkit-transition: @duration @property @easing;
+	-moz-transition: @duration @property @easing;
+	-o-transition: @duration @property @easing;
+	
 }
