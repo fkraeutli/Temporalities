@@ -79,7 +79,6 @@ d3.csv( "../brittenpoets/works_and_poets.csv", function( data ) {
 	
 } );
 
-function make() {
 	
 	p.container = d3.select( "body" )
 		.append( "svg" )
@@ -112,7 +111,7 @@ function make() {
 			}
 			
 		)
-		.range( p.radiusRange );
+		.radius( p.radiusRange );
 				
 	p.layout.poets = p.layout.add()
 		.nest( function( d ) {
@@ -135,10 +134,11 @@ function make() {
 			
 		)
 		.width( p.view.width )
-		.range( p.radiusRange );
+		.radius( p.radiusRange );
 		
 	
 		
 	update();
 	
-}
+
+function make() {}

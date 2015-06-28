@@ -23,7 +23,6 @@ Temporalities = function() {
 		
 	};
 	
-	
 	this.build = function() {
 		
 		return _build();
@@ -156,19 +155,19 @@ Temporalities.set = function() {
 		
 	var date,
 		nest,
-		range = [ 2, 10 ],
+		radiusRange = [ 2, 10 ],
 		title,
 		width = 600,
-		xScale,
+		scale,
 		me = {},
 		id = Temporalities.set.id++;
 	
 	me.build = function( data ) {
 	
 		
-		if ( ! xScale ) {
+		if ( ! scale ) {
 			
-			xScale = d3.scale.linear()
+			scale = d3.scale.linear()
 				.domain( [ d3.min( data, date ), d3.max( data, date ) ] )
 				.range( [ 0, width ] );
 			
@@ -180,7 +179,7 @@ Temporalities.set = function() {
 			
 		rScale = d3.scale.linear()
 			.domain( [ 1, d3.max( data, function( d ) { return d.values.length; } ) ] )
-			.range( range );
+			.range( radiusRange );
 			
 		for ( var i = 0; i < data.length; i++ ) {
 			
@@ -189,7 +188,7 @@ Temporalities.set = function() {
 			entry.title = title( entry.values[ 0 ] );
 			entry.date = d3.mean( entry.values, date ); // make this average or mean
 			
-			entry.x = xScale( entry.date );
+			entry.x = scale( entry.date );
 			entry.y = 0;
 			entry.r = rScale( entry.values.length );
 			
@@ -231,11 +230,11 @@ Temporalities.set = function() {
 		
 	};
 	
-	me.range = function( _x ) {
+	me.radius = function( _x ) {
 			
-		if ( ! arguments.length ) return range;
+		if ( ! arguments.length ) return radiusRange;
 		
-		range = _x;
+		radiusRange = _x;
 		return me;
 		
 	};
@@ -260,11 +259,11 @@ Temporalities.set = function() {
 		
 	};
 	
-	me.xScale = function( _x ) {
+	me.scale = function( _x ) {
 			
-		if ( ! arguments.length ) return xScale;
+		if ( ! arguments.length ) return scale;
 		
-		xScale = _x;
+		scale = _x;
 		
 		_flagUpdated();
 		

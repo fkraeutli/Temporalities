@@ -74,7 +74,7 @@ function make() {
 			}
 			
 		)
-		.range( p.radiusRange )
+		.radius( p.radiusRange )
 		.width( p.view.width );
 	
 	p.layout.artists = p.layout.add()	
@@ -97,7 +97,7 @@ function make() {
 			}
 			
 		)
-		.range( p.radiusRange )
+		.radius( p.radiusRange )
 		.width( p.view.width );
 		
 	p.layout.places = p.layout.add()	
@@ -120,7 +120,7 @@ function make() {
 			}
 			
 		)
-		.range( p.radiusRange )
+		.radius( p.radiusRange )
 		.width( p.view.width );
 						
 	update();
