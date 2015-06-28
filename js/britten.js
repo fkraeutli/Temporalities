@@ -79,7 +79,11 @@ d3.csv( "../brittenpoets/works_and_poets.csv", function( data ) {
 	
 } );
 
+
 	
+
+function make() {	
+		
 	p.container = d3.select( "body" )
 		.append( "svg" )
 		.attr( "width", 800 )
@@ -139,6 +143,4 @@ d3.csv( "../brittenpoets/works_and_poets.csv", function( data ) {
 	
 		
 	update();
-	
-
-function make() {}
+}
