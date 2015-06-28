@@ -23,6 +23,32 @@ Temporalities = function() {
 		
 	};
 	
+	this.axes = function() {
+		
+		var axes = [];
+		
+		for ( var i = 0; i < sets.length; i++ ) {
+			
+			var scale = sets[ i ].scale(),
+				ticks = scale.ticks();
+				
+			var ticksData = {};
+			
+			for( var j = 0; j < ticks.length; j++ ) {
+				
+				ticksData[ ticks[ j ].valueOf() ] = scale( ticks[ j ] );
+				
+			}
+			
+			axes.push( ticksData );
+			
+			
+		}
+		
+		return axes;
+		
+	};
+	
 	this.build = function() {
 		
 		return _build();
@@ -167,7 +193,7 @@ Temporalities.set = function() {
 		
 		if ( ! scale ) {
 			
-			scale = d3.scale.linear()
+			scale = d3.time.scale()
 				.domain( [ d3.min( data, date ), d3.max( data, date ) ] )
 				.range( [ 0, width ] );
 			
