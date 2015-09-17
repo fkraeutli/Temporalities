@@ -129,6 +129,7 @@ function concatenateMoDAdata() {
 			object_style:				object["Style"],
 			object_title:				object["Title"],
 			object_treatment_date:		object["Treatment date"],
+			url:					"http://www.moda.mdx.ac.uk/" + object["URL slug"]
 		};
 		
 		for( var j = 0; j < object["Procedure ID"].length; j++ ) {
