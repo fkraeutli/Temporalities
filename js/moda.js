@@ -100,6 +100,8 @@ function concatenateMoDAdata() {
 			procedure_end:		procedure["Procedure end date"],
 			procedure_title:	procedure["Procedure title"],
 			procedure_venue:	procedure["Venue"]
+			procedure_venue:	procedure["Venue"],
+			procedure_raw:		procedure,
 			
 		};		
 		
@@ -130,6 +132,8 @@ function concatenateMoDAdata() {
 			object_style:				object["Style"],
 			object_title:				object["Title"],
 			object_treatment_date:		object["Treatment date"],
+			object_raw:					object,
+			
 			url:					"http://www.moda.mdx.ac.uk/" + object["URL slug"]
 		};
 		
