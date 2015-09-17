@@ -1,3 +1,10 @@
+var MODE_INDIVIDUAL = 1,
+	MODE_UNIFORM = 2,
+	MODE_OVERLAP = 3;
+
+var mode = MODE_UNIFORM;
+
+
 var dataset, objects, procedures;
 
 var p = {
@@ -161,7 +168,45 @@ function concatenateMoDAdata() {
 }
 
 function make() {	
+	 
+	var procScale, objScale;
+	
+	switch ( mode ) {
 		
+		case MODE_INDIVIDUAL:
+	
+			procScale = d3.time.scale()
+				.domain( [ new Date( 2008, 0, 1 ), new Date( 2016, 0, 1 ) ] )
+				.range( [ 0, p.view.width ] );
+				
+			objScale = d3.time.scale()
+				.domain( [ new Date( 1860, 0, 1 ), new Date( 1960, 0, 1 ) ] )
+				.range( [ 0, p.view.width ] );
+				
+			break;
+			
+		case MODE_UNIFORM:
+			
+			objScale = procScale = d3.time.scale()
+					.domain( [ new Date( 1860, 0, 1 ), new Date( 2040, 0, 1 ) ] )
+					.range( [ 0, p.view.width ] );
+					
+			break;
+		
+		case MODE_OVERLAP:
+	
+			procScale = d3.time.scale()
+				.domain( [ new Date( 1940, 0, 1 ), new Date( 2040, 0, 1 ) ] )
+				.range( [ 0, p.view.width ] );
+				
+			objScale = d3.time.scale()
+				.domain( [ new Date( 1860, 0, 1 ), new Date( 1960, 0, 1 ) ] )
+				.range( [ 0, p.view.width ] );
+				
+			break;
+			
+	}
+
 	p.container = d3.select( "body" )
 		.append( "svg" )
 		.attr( "width", 1600)
@@ -197,6 +242,7 @@ function make() {
 			}
 			
 		)
+		.scale( objScale )
 		.width( p.view.width )
 		.radius( p.radiusRange );
 				
@@ -220,6 +266,7 @@ function make() {
 			}
 			
 		)
+		.scale( procScale )
 		.width( p.view.width )
 		.radius( p.radiusRange );
 		
