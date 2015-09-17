@@ -156,7 +156,7 @@ Temporalities = function() {
 							
 						}
 						
-						if ( entry1.x && entry2.x  ) {
+						if ( ! isNaN( entry1.x ) && ! isNaN( entry2.x )  ) {
 						
 							entry1.connections.push(
 								
