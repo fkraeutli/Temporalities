@@ -1,9 +1,31 @@
 var MODE_INDIVIDUAL = 1,
 	MODE_UNIFORM = 2,
-	MODE_OVERLAP = 3;
+	MODE_OVERLAP = 3,
+	mode;
 
-var mode = MODE_UNIFORM;
 
+switch ( window.location.hash ) {
+	
+	case "#uniform":
+	
+		mode = MODE_UNIFORM;
+		break;
+		
+	case "#individual":
+	
+		mode = MODE_INDIVIDUAL;
+		break;
+		
+	case "#overlap":
+	
+		mode = MODE_OVERLAP;
+		break;
+		
+	default:
+	
+		mode = MODE_INDIVIDUAL;
+	
+}
 
 var dataset, objects, procedures;
 
