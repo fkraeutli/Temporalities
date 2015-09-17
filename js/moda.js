@@ -10,6 +10,7 @@ var dataset, objects, procedures;
 var p = {
 	
 	radiusRange: [ 2, 15 ],
+	radiusRange: [ 8, 15 ],
 	
 	view: {
 		
