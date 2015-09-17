@@ -270,7 +270,31 @@ function make() {
 		.width( p.view.width )
 		.radius( p.radiusRange );
 		
-	
+	/*
+	p.layout.objects = p.layout.add()	
+		.nest( function( d ) {
+
+			return d.object_id;
+
+		} )
+		.date( function( d )  {
+			
+			return new Date( d.object_production_date.replace( /\D/g ,"" ), 0, 1) ;
+			
+		} )
+		.title(
+			
+			function( d ) {
+				
+				return d.object_title || d.object_name;
+				
+			}
+			
+		)
+		.width( p.view.width )
+		.radius( p.radiusRange );
+		
+		// */
 		
 	update();
 }
