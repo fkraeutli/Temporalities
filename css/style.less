@@ -40,6 +40,17 @@ text {
 			display: block;
 			
 		}
+		
+		g.connections {
+			
+			path.selected {
+				
+				.transition();
+				stroke: white;
+				opacity: .8;
+				
+			}
+		}
 	}
 	
 	circle.entry {
@@ -68,6 +79,22 @@ text {
 	}
 }
 
+.axes {
+	
+	.lines {
+		
+		path {
+			
+			stroke: white;
+			stroke-width: 2px;
+			fill: none;
+			opacity: .2;
+			
+		}
+		
+	}
+	
+}
 
 .transition( @duration: .2s, @property: all, @easing: linear ) {
 	

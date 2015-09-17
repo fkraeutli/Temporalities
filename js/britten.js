@@ -2,16 +2,16 @@ var dataset;
 
 var p = {
 	
-	radiusRange: [ 2, 10 ],
+	radiusRange: [ 2, 15 ],
 	
 	view: {
 		
-		width: 600,
-		height: 800,
+		width: 1600,
+		height: 1600,
 		
 		perspective: {
 			
-			height: 150
+			height: 400
 			
 		}
 		
@@ -86,10 +86,14 @@ function make() {
 		
 	p.container = d3.select( "body" )
 		.append( "svg" )
-		.attr( "width", 800 )
-		.attr( "height", 800 )
+		.attr( "width", 1600)
+		.attr( "height", p.view.height )
 		.append( "g" )
 		.attr( "transform", "translate( 10, 50 )" );
+		
+	
+	p.container.axes = p.container.append( "g" )
+		.attr( "class", "axes" );
 		
 	p.layout = new Temporalities();
 	
@@ -115,6 +119,7 @@ function make() {
 			}
 			
 		)
+		.width( p.view.width )
 		.radius( p.radiusRange );
 				
 	p.layout.poets = p.layout.add()

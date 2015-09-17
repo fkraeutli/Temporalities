@@ -11,7 +11,7 @@ var p = {
 		
 		perspective: {
 			
-			height: 200
+			height: 300
 			
 		}
 		
@@ -45,10 +45,13 @@ function make() {
 	
 	p.container = d3.select( "body" )
 		.append( "svg" )
-		.attr( "width", p.view.width )
-		.attr( "height", p.view.height )
+		.attr( "width", p.view.width + 20 )
+		.attr( "height", p.view.height + 100 )
 		.append( "g" )
 		.attr( "transform", "translate( 10, 50 )" );
+				
+	p.container.axes = p.container.append( "g" )
+		.attr( "class", "axes" );
 		
 	p.layout = new Temporalities();
 	
