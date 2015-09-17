@@ -159,7 +159,14 @@ function update() {
 				return "entry_" + d.set_id + "_" + d.key.replace(/\W+/g, "");
 				
 			} )
-			.on( "click", function( d ) { console.log( d ); } );
+			.on( "click", function( d ) { console.log( d ); } )
+			.on( "dblclick", function( d ) { 
+				
+				if ( d.values[ 0 ].url ) {
+					
+					window.open( d.values[ 0 ].url );
+				}
+			} );
 			
 		entriesEnter.append( "g" )
 			.attr( "class", "connections" );
