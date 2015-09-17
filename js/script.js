@@ -2,6 +2,89 @@
 
 function update() {
 	
+	function updateAxes() {
+		
+		if ( ! p.container.axes ) {
+			
+			p.container.axes = p.container.append( "g" )
+				.attr( "class", "axes" );
+						
+		}
+		
+		if ( ! p.container.axes.lines ) {
+			
+			p.container.axes.lines = p.container.axes.append( "g" )
+				.attr( "class", "lines" );
+				
+		}
+
+		
+		var lines = p.container.axes.lines.selectAll( "g.line" )
+			.data( p.layout.axes() );
+			
+		linesEnter = lines.enter()
+			.append( "g" )
+			.attr( "class", "line" );
+			
+		linesEnter.append( "path" );
+		linesEnter.append( "text" );
+		
+		lines.select( "path" )
+			.transition()
+			.duration( 1000 )
+			.attr( "d", function( d ) { 
+				
+				var coor = [];
+				var ret = "";
+				
+				for ( var i = 0; i < d.x.length; i++ ) {
+					
+					coor.push( [ d.x[ i ].x, d.x[ i ].index * p.view.perspective.height - p.view.perspective.height / 3 ] );
+					coor.push( [ d.x[ i ].x, d.x[ i ].index * p.view.perspective.height + p.view.perspective.height / 3 ] );
+					
+				}
+			
+				for( var j = 0; j < coor.length; j++) {
+					
+					if ( j === 0 ) {
+						
+						ret += "M" + coor[ j ][ 0 ] + "," + coor[ j ][ 1 ];
+						
+					} else {
+						
+						ret += "L" + coor[ j ][ 0 ] + "," + coor[ j ][ 1 ];
+						
+					}
+					
+				}
+				
+				return ret;
+
+				
+			} );
+			
+		lines.select( "text" )
+			.attr ( "x", function( d ) { 
+				
+				return d.x[ d.x.length - 1 ].x;
+				
+			} )
+			.attr ( "y", function( d ) { 
+				
+				return d.x[ d.x.length - 1 ].index * p.view.perspective.height + p.view.perspective.height / 3;
+				
+			} )
+			.text( function( d ) { 
+				
+				return new Date( +d.tick ).getFullYear();
+				
+			} );
+			
+		lines.exit().remove();
+		
+	}
+	
+	// TODO highlight only connections that are actually connected at both ends
 	function updateConnections() {
 			
 		var connections = entries.selectAll( "g.connections" )
@@ -64,7 +147,7 @@ function update() {
 		entries = perspectives.selectAll( "g.entry" )
 			.data( function( d ) { 
 				
-				return d.filter( function(d) { return d.x; } ); 
+				return d.filter( function(d) { return ! isNaN( d.x ); } ); 
 				
 			} );
 			
@@ -85,14 +168,17 @@ function update() {
 			.attr( "class", "entry" );
 			
 		var entriesEnterLabels = entriesEnter.append( "g" )
-			.attr( "class", "label" )
+			.attr( "class", "label" );
+			
+		entriesEnterLabels.append( "text" );
+		
+		entries.select( "g.label" )
 			.attr( "transform", function( d ) { 
 				
 				return "translate( " + d.x + ", " + d.y + " )";
 				
-			} );
-			
-		entriesEnterLabels.append( "text" )
+			} )
+		.select( "text" )
 			.attr( "y", function( d ) {
 				
 				return -d.r - 10;
@@ -111,6 +197,8 @@ function update() {
 					if ( d.connections && d.connections.length ) {
 						for ( var i = 0; i < d.connections.length; i++ ) {
 					
+							d.connections[ i ].target.selected = true;
+					
 							d3.select( "#entry_" + d.connections[ i ].target.set_id + "_" + d.connections[ i ].target.key.replace(/\W+/g, ""))
 							.classed( "selected", true );
 							
@@ -126,6 +214,7 @@ function update() {
 					
 						for ( var i = 0; i < d.incoming.length; i++ ) {
 						
+							d.incoming[ i ].selected = true;
 						
 							d3.select( "#entry_" + d.incoming[ i ].set_id + "_" + d.incoming[ i ].key.replace(/\W+/g, ""))
 								.classed( "selected", true );
@@ -138,6 +227,8 @@ function update() {
 					
 				}
 				
+				d.selected = true; // TODO for all
+				
 				d3.select( this ).classed( "selected", true );
 				
 				highlightIncoming( d );
@@ -145,6 +236,8 @@ function update() {
 				
 			} )
 			.on( "mouseout", function( d ) { 
+				
+				d.selected = false; // TODO for all
 				
 				d3.selectAll( ".selected" )
 					.classed( "selected", false );
@@ -195,6 +288,7 @@ function update() {
 		perspectives;
 	
 	updatePerspectives();
+	updateAxes();
 	updateEntries();			
 	updateConnections();
 		
