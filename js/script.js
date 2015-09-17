@@ -137,7 +137,12 @@ function update() {
 						
 				return lineFunction( [ from, via1, via2, to ] );
 				
-			} );		
+			} )
+			.attr( "class", function( d ) {
+				
+				return "connection_" + d.target.key.replace( /\W+/g, "" );
+				
+			} );
 		
 		connections.exit().remove();
 	}
@@ -156,7 +161,7 @@ function update() {
 			.attr( "class", "entry" )
 			.attr( "id", function( d ) { 
 				
-				return "entry_" + d.set_id + "_" + d.key.replace(/\W+/g, "");
+				return getEntryId( d );
 				
 			} )
 			.on( "click", function( d ) { console.log( d ); } )
@@ -204,10 +209,14 @@ function update() {
 					if ( d.connections && d.connections.length ) {
 						for ( var i = 0; i < d.connections.length; i++ ) {
 					
+							var targetId = d.connections[ i ].target.key.replace(/\W+/g, "");
+					
 							d.connections[ i ].target.selected = true;
 					
-							d3.select( "#entry_" + d.connections[ i ].target.set_id + "_" + d.connections[ i ].target.key.replace(/\W+/g, ""))
+							d3.select( "#entry_" + d.connections[ i ].target.set_id + "_" + targetId)
 							.classed( "selected", true );
+							
+							d3.select( "#" + getEntryId( d ) + " .connection_" + targetId ).classed( "selected", true );
 							
 							highlightConnections( d.connections[ i ].target );
 							
@@ -221,10 +230,14 @@ function update() {
 					
 						for ( var i = 0; i < d.incoming.length; i++ ) {
 						
+							var targetId = d.incoming[ i ].key.replace(/\W+/g, "");
+						
 							d.incoming[ i ].selected = true;
 						
-							d3.select( "#entry_" + d.incoming[ i ].set_id + "_" + d.incoming[ i ].key.replace(/\W+/g, ""))
+							d3.select( "#entry_" + d.incoming[ i ].set_id + "_" + targetId )
 								.classed( "selected", true );
+								
+							d3.select( "#" + getEntryId( d.incoming[ i ] ) + " .connection_" + d.key.replace(/\W+/g, "") ).classed( "selected", true );
 								
 							highlightIncoming( d.incoming[ i ] );
 							
@@ -299,4 +312,10 @@ function update() {
 	updateEntries();			
 	updateConnections();
 		
+}
+
+function getEntryId( d ) {
+	
+	return "entry_" + d.set_id + "_" + d.key.replace(/\W+/g, "");
+	
 }
