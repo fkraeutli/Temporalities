@@ -25,12 +25,14 @@ Temporalities = function() {
 	
 	this.axes = function() {
 		
-		var axes = [];
+		var axes = [],
+			hash = [],
+			ret = [];
 		
 		for ( var i = 0; i < sets.length; i++ ) {
 			
 			var scale = sets[ i ].scale(),
-				ticks = scale.ticks();
+				ticks = scale.ticks( );
 				
 			var ticksData = {};
 			
@@ -43,9 +45,40 @@ Temporalities = function() {
 			axes.push( ticksData );
 			
 			
+			
 		}
 		
-		return axes;
+		for ( var k = 0; k < axes.length; k++ ) {
+
+			for ( var tick in axes[ k ] ) {
+				
+				if ( ! hash[ tick ] ) {
+					
+					ret.push( {
+						
+						tick: tick,
+						x: []
+						
+					} );
+					hash[ tick ] = ret.length - 1;
+					
+				}
+				
+				var current = ret[ hash [ tick ] ];
+				
+				current.x.push( {
+					
+					x: axes[ k ][ tick ],
+					index: k
+					
+				} );
+				
+				
+			}
+			
+		}
+		
+		return ret;
 		
 	};
 	
@@ -189,7 +222,6 @@ Temporalities.set = function() {
 		id = Temporalities.set.id++;
 	
 	me.build = function( data ) {
-	
 		
 		if ( ! scale ) {
 			
@@ -202,6 +234,7 @@ Temporalities.set = function() {
 		data = d3.nest()
 			.key( nest )
 			.entries( data );
+
 			
 		rScale = d3.scale.linear()
 			.domain( [ 1, d3.max( data, function( d ) { return d.values.length; } ) ] )
@@ -226,7 +259,6 @@ Temporalities.set = function() {
 		data.sort( function( a, b ) { return  b.r - a.r; } );
 		
 		_arrange( data );
-		
 			
 		return data;
 		
