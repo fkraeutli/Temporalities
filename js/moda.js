@@ -9,7 +9,6 @@ var dataset, objects, procedures;
 
 var p = {
 	
-	radiusRange: [ 2, 15 ],
 	radiusRange: [ 8, 15 ],
 	
 	view: {
@@ -99,9 +98,9 @@ function concatenateMoDAdata() {
 			procedure_begin:	procedure["Procedure begin date"],
 			procedure_end:		procedure["Procedure end date"],
 			procedure_title:	procedure["Procedure title"],
-			procedure_venue:	procedure["Venue"]
 			procedure_venue:	procedure["Venue"],
 			procedure_raw:		procedure,
+			
 			
 		};		
 		
