@@ -207,7 +207,7 @@ function make() {
 				.range( [ 0, p.view.width ] );
 				
 			objScale = d3.time.scale()
-				.domain( [ new Date( 1500, 0, 1 ), new Date( 1960, 0, 1 ) ] )
+				.domain( [ new Date( 1860, 0, 1 ), new Date( 2016, 0, 1 ) ] )
 				.range( [ 0, p.view.width ] );
 				
 			break;
@@ -215,7 +215,7 @@ function make() {
 		case MODE_UNIFORM:
 			
 			objScale = procScale = d3.time.scale()
-					.domain( [ new Date( 1760, 0, 1 ), new Date( 2040, 0, 1 ) ] )
+					.domain( [ new Date( 1860, 0, 1 ), new Date( 2020, 0, 1 ) ] )
 					.range( [ 0, p.view.width ] );
 					
 			break;
