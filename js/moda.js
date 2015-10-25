@@ -31,7 +31,7 @@ var dataset, objects, procedures, objectHash = {};
 
 var p = {
 	
-	radiusRange: [ 1, 15 ],
+	radiusRange: [ 1.5, 10 ],
 	
 	view: {
 		

@@ -9,6 +9,8 @@ var p = {
 		width: 1600,
 		height: 800,
 		
+		padding: 50,
+		
 		perspective: {
 			
 			height: 300

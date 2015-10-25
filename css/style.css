@@ -14,9 +14,6 @@ text {
   -moz-transition: 0.2s all linear;
   -o-transition: 0.2s all linear;
 }
-.entry.selected g.label {
-  display: block;
-}
 .entry.selected g.connections path.selected {
   transition: 0.2s all linear;
   -webkit-transition: 0.2s all linear;
