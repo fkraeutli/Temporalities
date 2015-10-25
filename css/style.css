@@ -1,5 +1,43 @@
-g.link path {
+body {
+  background: #222222;
+  font-family: sans-serif;
+  font-size: 10px;
+}
+text {
+  fill: white;
+  pointer-events: none;
+}
+.entry.selected circle.entry {
+  fill: yellow;
+  transition: 0.2s all linear;
+  -webkit-transition: 0.2s all linear;
+  -moz-transition: 0.2s all linear;
+  -o-transition: 0.2s all linear;
+}
+.entry.selected g.connections path.selected {
+  transition: 0.2s all linear;
+  -webkit-transition: 0.2s all linear;
+  -moz-transition: 0.2s all linear;
+  -o-transition: 0.2s all linear;
+  stroke: white;
+  opacity: .5;
+  z-index: 100;
+}
+.entry circle.entry {
+  fill: #bbb;
+}
+.entry g.label {
+  display: none;
+}
+.entry .connections path {
   fill: none;
-  stroke: black;
-  opacity: .1;
+  stroke: white;
+  opacity: .02;
+  pointer-events: none;
+}
+.axes .lines path {
+  stroke: white;
+  stroke-width: 2px;
+  fill: none;
+  opacity: .2;
 }

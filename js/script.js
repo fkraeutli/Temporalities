@@ -1,200 +1,120 @@
-var dataset;
 
-var p = {
+
+function update() {
 	
-	radiusRange: [ 2, 10 ],
-	
-	view: {
+	function updateAxes() {
 		
-		width: 600,
-		height: 800,
-		
-		facet: {
+		if ( ! p.container.axes ) {
 			
-			height: 150
-			
+			p.container.axes = p.container.append( "g" )
+				.attr( "class", "axes" );
+						
 		}
 		
-	}
-	
-};
-
-d3.csv( "../brittenpoets/works_and_poets.csv", function( data ) { 
-	
-	dataset = [];
-	fakeCycle = 1000;
-	
-	for( var i = 0; i < data.length; i++ ) {
-		
-		var work = data[ i ];
-		
-		work.author_id = +work.author_id;
-		work.cycle_id = +work.cycle_id;
-		work.day_composed = +work.day_composed;
-		work.day_composed_to = +work.day_composed_to;
-		work.id = +work.id;
-		work.month_composed = +work.month_composed;
-		work.month_composed_to = +work.month_composed_to;
-		work.year_composed = +work.year_composed;
-		work.year_composed_to = +work.year_composed_to;
-		work.year_poet_born = +work.year_poet_born;
-		work.year_poet_died = +work.year_poet_died;
-		
-		work.date_composed_from = new Date( work.year_composed, work.month_composed -1 || 0, work.day_composed || 0 );
-		
-		work.date_composed_to = new Date( work.year_composed_to, work.month_composed_to -1 || 0, work.day_composed_to || 0 );
-		
-		work.date_poet = new Date( 0, 0, 1 );
-		
-		if ( work.cycle_id == 1 || isNaN( work.cycle_id ) ) {
+		if ( ! p.container.axes.lines ) {
 			
-			work.cycle_id = fakeCycle++;
-			
-		}
-
-		
-		if ( ! work.year_poet_died ) {
-			
-			work.year_poet_died = new Date().getFullYear(); // set death year to current for poets who are still alive
-			
-		}
-		
-		work.date_poet.setFullYear( work.year_poet_born + ( work.year_poet_died - work.year_poet_born ) / 2 ); 
-		
-		if ( work.cycle_name == "none" ) {
-			
-			work.cycle_name = false;
-			
-		}
-		
-		if ( ! isNaN( work.date_composed_from.valueOf() ) ) {
-			
-			dataset.push( work );
-			
-		}
-		
-	}
-	
-	make();
-	
-} );
-
-function make() {
-	
-	var container = d3.select( "body" )
-		.append( "svg" )
-		.append( "g" )
-		.attr( "transform", "translate( 10, 50 )" );
-		
-	cycles = Temporalities.set()
-		.nest( function( d ) {
-
-			return d.cycle_id;
-
-		} )
-		.date( function( d )  {
-			
-			return d.date_composed_to ? d.date_composed_from : new Date( d.date_composed_from.valueOf() + ( d.date_composed_to.valueOf() - d.date_composed_from.valueOf() ) / 2 );
-			
-		} )
-		.title(
-			
-			function( d ) {
+			p.container.axes.lines = p.container.axes.append( "g" )
+				.attr( "class", "lines" );
 				
-				return d.cycle_name;
-				
-			}
-			
-		)
-		.width( p.view.width )
-		.range( p.radiusRange );
-		
-	poets = Temporalities.set()
-		.nest( function( d ) {
+		}
 
-			return d.author_id;
-
-		} )
-		.date( function( d )  {
-			
-			return d.date_poet;
-			
-		} )
-		.title(
-			
-			function( d ) {
-				
-				return d.author_name;
-				
-			}
-			
-		)
-		.width( p.view.width )
-		.range( p.radiusRange );
 		
-	cyclesData = cycles( dataset );
-	poetsData = poets( dataset );
-		
-	var facets = container.selectAll( ".facet" )
-		.data( [ cyclesData, poetsData ] );
+		var lines = p.container.axes.lines.selectAll( "g.line" )
+			.data( p.layout.axes() );
 			
-	facets.enter()
-		.append( "g" )
-		.attr( "class", "facet" )
-		.attr( "transform", function( d, i ) {
-			
-			return "translate( 0, " + i * p.view.facet.height + " )";
-			
-		} );
-	
-	facets.selectAll( "g.entry" )
-		.data( function( d ) { 
-			
-			return d.filter( function(d) { return d.x; } ); 
-		} )
-		.enter()
-	.append( "g" )
-		.attr( "class", "entry" )
-		.attr( "transform", function( d ) {
-			
-			return "translate(" + d.x + ", " + d.y + " )";
-			
-		} )
-	.append( "circle" )
-		.attr( "r", function( d ) {
-			
-			return d.r;
-			
-		} );
-		
-	d3.selectAll( "g.entry" )
-		.on( "click", function( d ) { console.log( d.title ); } );
-		
-	var connections = Temporalities.connections()
-		.data( dataset );
-		
-	connectionsData = connections( [ cycles, poets ] );
-	
-	var links = container.append( "g" )
-			.attr( "id", "links" )
-		.selectAll( "g.link" )
-			.data( connectionsData)
-		.enter()
+		linesEnter = lines.enter()
 			.append( "g" )
-			.attr( "class", "link" )
-			.append( "path" )
+			.attr( "class", "line" );
+			
+		linesEnter.append( "path" );
+		linesEnter.append( "text" );
+		
+		lines.select( "path" )
+			.transition()
+			.duration( 1000 )
+			.attr( "d", function( d ) { 
+				
+				var coor = [];
+				var ret = "";
+				
+				for ( var i = 0; i < d.x.length; i++ ) {
+					
+					coor.push( [ d.x[ i ].x, p.view.padding + d.x[ i ].index * p.view.perspective.height - p.view.perspective.height / 3 ] );
+					coor.push( [ d.x[ i ].x, p.view.padding + d.x[ i ].index * p.view.perspective.height + p.view.perspective.height / 3 ] );
+					
+				}
+			
+				for( var j = 0; j < coor.length; j++) {
+					
+					if ( j === 0 ) {
+						
+						ret += "M" + coor[ j ][ 0 ] + "," + coor[ j ][ 1 ];
+						
+					} else {
+						
+						ret += "L" + coor[ j ][ 0 ] + "," + coor[ j ][ 1 ];
+						
+					}
+					
+				}
+				
+				return ret;
+
+				
+			} );
+			
+		lines.select( "text" )
+			.attr ( "x", function( d ) { 
+				
+				return d.x[ d.x.length - 1 ].x;
+				
+			} )
+			.attr ( "y", function( d ) { 
+				
+				return  p.view.padding + d.x[ d.x.length - 1 ].index * p.view.perspective.height + p.view.perspective.height / 3;
+				
+			} )
+			.text( function( d ) { 
+				
+				return new Date( +d.tick ).getFullYear();
+				
+			} );
+			
+		lines.exit().remove();
+		
+	}
+	
+	// TODO highlight only connections that are actually connected at both ends
+	function updateConnections() {
+			
+		var connections = entries.selectAll( "g.connections" )
+			.selectAll( "path" )
+			.data( function( ) { 
+					 
+					var d = d3.select( this.parentNode.parentNode ).datum();
+					
+					return d.connections && d.connections.length ? d.connections : []; 
+					
+			} );
+		
+		connections.enter()
+			.append( "path" );
+			
+		connections
+			.transition()
+			.duration( 1000 )
 			.attr( "d", function ( d ) {
 				
 				var from = {
 						
-						x: d[ 0 ].x,
-						y: d[ 0 ].y + d[ 0 ].index * p.view.facet.height
+						x: d.x0,
+						y: d.y0 
 						
 					},
 					to = {
 						
-						x: d[ 1 ].x,
-						y: d[ 1 ].y + d[ 1 ].index * p.view.facet.height
+						x: d.x1,
+						y: d.y1 + p.view.perspective.height
 						
 					},
 					via1 = {
@@ -216,303 +136,186 @@ function make() {
 						.interpolate( "basis" );
 						
 				return lineFunction( [ from, via1, via2, to ] );
+				
+			} )
+			.attr( "class", function( d ) {
+				
+				return "connection_" + d.target.key.replace( /\W+/g, "" );
+				
 			} );
 		
-		
-}
-
-Temporalities = function() {
-	
-	var id = 0;
-	
-};
-
-Temporalities.set = function() {
-	
-	if( ! Temporalities.set.id ) Temporalities.set.id = 0;
-		
-	var data,
-		date,
-		nest,
-		range = [ 2, 10 ],
-		rawData,
-		title,
-		width = 600,
-		xScale;
-
-	Temporalities.set.id++;
-	
-	function me( data ) {
-	
-		return build( data );
-		
+		connections.exit().remove();
 	}
 	
-	function build( input ) {
+	function updateEntries() {	
 		
-		rawData = input;
-		data = input;
-	
-		if ( ! xScale ) {
-			
-			xScale = d3.scale.linear()
-				.domain( [ d3.min( data, date ), d3.max( data, date ) ] )
-				.range( [ 0, width ] );
-			
-		}
-	
-		data = d3.nest()
-			.key( nest )
-			.entries( data );
-			
-		rScale = d3.scale.linear()
-			.domain( [ 1, d3.max( data, function( d ) { return d.values.length; } ) ] )
-			.range( range );
-			
-			
-		for ( var i = 0; i < data.length; i++ ) {
-			
-			var entry = data[ i ];
-			
-			entry.title = title( entry.values[ 0 ] );
-			entry.date = d3.min( entry.values, date );
-			
-			entry.x = xScale( entry.date );
-			entry.y = 0;
-			entry.r = rScale( entry.values.length );
-			
-			entry.id = Temporalities.set.id;
-
-			
-		}
-		
-		data.sort( function( a, b ) { return  b.r - a.r; } );
-		
-		_arrange( data );
-			
-		return data;
-		
-	}
-	
-	me.data = function() {
-			
-		if ( ! arguments.length ) return data;
-		
-		return me;
-		
-	};
-	
-	me.date = function( _x ) {
-			
-		if ( ! arguments.length ) return date;
-		
-		date = _x;
-		return me;
-		
-	};
-	
-	me.id = function() {
-		
-		return Temporalities.set.id;
-		
-	};
-	
-	me.nest = function( _x ) {
-			
-		if ( ! arguments.length ) return nest;
-		
-		nest = _x;
-		return me;
-		
-	};
-	
-	me.range = function( _x ) {
-			
-		if ( ! arguments.length ) return range;
-		
-		range = _x;
-		return me;
-		
-	};
-	
-	me.title = function( _x ) {
-			
-		if ( ! arguments.length ) return title;
-		
-		title = _x;
-		return me;		
-	};
-
-	me.width = function( _x ) {
-			
-		if ( ! arguments.length ) return width;
-		
-		width = _x;
-		return me;
-		
-	};
-	
-	me.xScale = function( _x ) {
-			
-		if ( ! arguments.length ) return xScale;
-		
-		xScale = _x;
-		return me;
-		
-	};
-	
-	function _arrange( data ) {			
-			
-		function collide( node ) {
-			
-			var r = node.r,
-				nx1 = node.x - r,
-				nx2 = node.x + r,
-				ny1 = node.y - r,
-				ny2 = node.y + r;
+		entries = perspectives.selectAll( "g.entry" )
+			.data( function( d ) { 
 				
-			return function( quad, x1, y1, x2, y2 ) {
+				return d.filter( function(d) { return ! isNaN( d.x ); } ); 
 				
-				if ( quad.point && ( quad.point !== node ) ) {
+			} );
+			
+		var entriesEnter = entries.enter()
+			.append( "g" )
+			.attr( "class", "entry" )
+			.attr( "id", function( d ) { 
+				
+				return getEntryId( d );
+				
+			} )
+			.on( "click", function( d ) { console.log( d ); } )
+			.on( "dblclick", function( d ) { 
+				
+				if ( d.values[ 0 ].url ) {
 					
-					var x = node.x - quad.point.x,
-						y = node.y - quad.point.y || 1,
-						l = Math.sqrt(x * x + y * y);
-						
-					r = node.r + quad.point.r + 3;
+					window.open( d.values[ 0 ].url );
+				}
+			} );
+			
+		entriesEnter.append( "g" )
+			.attr( "class", "connections" );
+			
+		entriesEnter.append( "circle" )
+			.attr( "class", "entry" );
+			
+		var entriesEnterLabels = entriesEnter.append( "g" )
+			.attr( "class", "label" );
+			
+		entriesEnterLabels.append( "text" );
+		
+		entries.select( "g.label" )
+			.attr( "transform", function( d ) { 
 				
-					if (l < r) {
+				return "translate( " + d.x + ", " + d.y + " )";
 				
-						l = (l - r) / l ;
-	
-						node.y -= y *= l;
-						quad.point.y += y;					
-						
-						// node.x -= x *= l / 10;
-						// quad.point.x += x;
+			} )
+		.select( "text" )
+			.attr( "y", function( d ) {
 				
+				return -d.r - 10;
+				
+			} )
+			.html( function( d ) {
+				
+				return d.title;
+				
+			} );
+			
+		entries.on( "mouseover", function( d ) {
+				
+				function highlightConnections( d ) {
+					
+					if ( d.connections && d.connections.length ) {
+						for ( var i = 0; i < d.connections.length; i++ ) {
+					
+							var targetId = d.connections[ i ].target.key.replace(/\W+/g, "");
+					
+							d.connections[ i ].target.selected = true;
+					
+							d3.select( "#entry_" + d.connections[ i ].target.set_id + "_" + targetId)
+							.classed( "selected", true );
+							
+							d3.select( "#" + getEntryId( d ) + " .connection_" + targetId ).classed( "selected", true );
+							
+							highlightConnections( d.connections[ i ].target );
+							
+						}	
 					}
 				}
 				
-				return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
-				
-			};			
-			
-	
-		
-		}
-		
-		var iterations = 25;
-	
-		while ( --iterations ) {
-	
-			var i = 0,
-				n = data.length,
-				q = d3.geom.quadtree()
-					.x( function( d ) { return d.x; } )
-					.y( function( d ) { return d.y; } )
-					( data );
-	
-			while ( ++i < n ) q.visit( collide( data[ i ] ) ) ;
-	
-		}
-		
-		
-	}
-	
-	return me;
-
-};
-
-Temporalities.connections = function() {
-	
-	var dataset;
-	
-	function me( sets ) {
-		
-		return build( sets );		
-	}
-	
-	function build( sets ) {
-		
-		data = [];
-				
-		for ( var i = 0; i < sets.length - 1; i++ ) {
-			
-			var set1 = sets[ i ],
-				set2 = sets[ i + 1 ];
-			
-			var links = [];
-				
-			for ( var j = 0; j < dataset.length; j++ ) {
-				
-				var record = dataset[ j ];
-				
-				var s = set1.nest()( record ) + "," + set2.nest()( record );
-
-				if ( links.indexOf( s ) == -1 ) {
-				
-					links.push( s );
+				function highlightIncoming( d ) {
 					
-					var entry1 = set1.data().filter( function( d ) { return d.key == set1.nest()( record ); } )[ 0 ],
-						entry2 = set2.data().filter( function( d ) { return d.key == set2.nest()( record ); } )[ 0 ];
+					if ( d.incoming && d.incoming.length ) {
 					
-					entry1.index = i;
-					entry2.index = i + 1;	
+						for ( var i = 0; i < d.incoming.length; i++ ) {
 						
-					data.push( [ entry1, entry2	] );
-
+							var targetId = d.incoming[ i ].key.replace(/\W+/g, "");
+						
+							d.incoming[ i ].selected = true;
+						
+							d3.select( "#entry_" + d.incoming[ i ].set_id + "_" + targetId )
+								.classed( "selected", true );
+								
+							d3.select( "#" + getEntryId( d.incoming[ i ] ) + " .connection_" + d.key.replace(/\W+/g, "") ).classed( "selected", true );
+								
+							highlightIncoming( d.incoming[ i ] );
+							
+						}
+						
+					}
 					
 				}
-			}
+				
+				d.selected = true; // TODO for all
+				
+				d3.select( this ).classed( "selected", true );
+				
+				highlightIncoming( d );
+				highlightConnections( d );			
+				
+			} )
+			.on( "mouseout", function( d ) { 
+				
+				d.selected = false; // TODO for all
+				
+				d3.selectAll( ".selected" )
+					.classed( "selected", false );
+				
+			} );
 		
-			return data;	
+		entries.select( "circle.entry" )
+			.transition()
+			.duration( 1000 )
+			.attr( "r", function( d ) {
 				
-		}
-		
-			
-			/*
-		for ( var i = 0; i < dataset.length; i++ ) {
-			
-			var record = dataset[ i ];
-			
-			var s = work.cycle_id + "," + work.author_id;
-			
-			if ( connections.indexOf( s ) == -1 ) {
+				return d.r;
 				
-				connections.push( s );
+			} )
+			.attr( "cx", function( d ) { 
 				
-				var author = p.data.poets.filter( function ( d ) { return d.key == work.author_id; } )[ 0 ],
-					cycle =  p.data.cycles.filter( function ( d ) { return d.key == work.cycle_id; } )[ 0 ];
-					
-				if ( author && cycle ) {
-									
-					p.data.poetsToCycles.push( { 
-					
-						author: author, 
-									
-						cycle: cycle,
-						
-						selections: [] 
-						
-					} );
-				}
+				return d.x;
 				
-			}*/
+			} )
+			.attr( "cy", function( d ) { 
+				
+				return d.y;
+				
+			} );
 			
+		entries.exit().remove();
+
 	}
-
-
 	
-	me.data = function( _x ) {
+	function updatePerspectives() {
 			
-		if ( ! arguments.length ) return dataset;
+		perspectives = p.container.selectAll( ".perspective" )
+			.data( p.layout.build() );
+				
+		perspectives.enter()
+			.append( "g" )
+			.attr( "class", "perspective" );
+			
+		perspectives.attr( "transform", function( d, i ) {
+				
+			return "translate( 0, " + ( i * p.view.perspective.height + p.view.padding )  + " )";
+			
+		} );
 		
-		dataset = _x;
-		return me;
+	}
+	
+	var entries,
+		perspectives;
+	
+	updatePerspectives();
+	updateAxes();
+	updateEntries();			
+	updateConnections();
 		
-	};
+}
+
+function getEntryId( d ) {
 	
-	return me;
+	return "entry_" + d.set_id + "_" + d.key.replace(/\W+/g, "");
 	
-};
+}
