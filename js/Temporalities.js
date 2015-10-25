@@ -347,7 +347,7 @@ Temporalities.set = function() {
 						y = node.y - quad.point.y || 1,
 						l = Math.sqrt(x * x + y * y);
 						
-					r = node.r + quad.point.r + 3;
+					r = node.r + quad.point.r + 1;
 				
 					if (l < r) {
 				

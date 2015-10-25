@@ -23,7 +23,8 @@ text {
   -moz-transition: 0.2s all linear;
   -o-transition: 0.2s all linear;
   stroke: white;
-  opacity: .8;
+  opacity: .5;
+  z-index: 100;
 }
 .entry circle.entry {
   fill: #bbb;
@@ -34,7 +35,7 @@ text {
 .entry .connections path {
   fill: none;
   stroke: white;
-  opacity: .1;
+  opacity: .02;
   pointer-events: none;
 }
 .axes .lines path {

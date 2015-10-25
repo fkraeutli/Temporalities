@@ -39,8 +39,8 @@ function update() {
 				
 				for ( var i = 0; i < d.x.length; i++ ) {
 					
-					coor.push( [ d.x[ i ].x, d.x[ i ].index * p.view.perspective.height - p.view.perspective.height / 3 ] );
-					coor.push( [ d.x[ i ].x, d.x[ i ].index * p.view.perspective.height + p.view.perspective.height / 3 ] );
+					coor.push( [ d.x[ i ].x, p.view.padding + d.x[ i ].index * p.view.perspective.height - p.view.perspective.height / 3 ] );
+					coor.push( [ d.x[ i ].x, p.view.padding + d.x[ i ].index * p.view.perspective.height + p.view.perspective.height / 3 ] );
 					
 				}
 			
@@ -71,7 +71,7 @@ function update() {
 			} )
 			.attr ( "y", function( d ) { 
 				
-				return d.x[ d.x.length - 1 ].index * p.view.perspective.height + p.view.perspective.height / 3;
+				return  p.view.padding + d.x[ d.x.length - 1 ].index * p.view.perspective.height + p.view.perspective.height / 3;
 				
 			} )
 			.text( function( d ) { 
@@ -298,7 +298,7 @@ function update() {
 			
 		perspectives.attr( "transform", function( d, i ) {
 				
-			return "translate( 0, " + i * p.view.perspective.height + " )";
+			return "translate( 0, " + ( i * p.view.perspective.height + p.view.padding )  + " )";
 			
 		} );
 		
