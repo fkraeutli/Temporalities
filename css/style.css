@@ -32,7 +32,7 @@ text {
 .entry .connections path {
   fill: none;
   stroke: white;
-  opacity: .02;
+  opacity: .05;
   pointer-events: none;
 }
 .axes .lines path {
@@ -40,4 +40,7 @@ text {
   stroke-width: 2px;
   fill: none;
   opacity: .2;
+}
+.label line {
+  stroke: yellow;
 }
