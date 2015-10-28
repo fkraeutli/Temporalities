@@ -149,7 +149,14 @@ function update() {
 	
 	function updateEntries() {	
 		
-		entries = perspectives.selectAll( "g.entry" )
+		if ( perspectives.selectAll( "g.entries" ).empty() ) {
+			
+			perspectives.append( "g" )
+				.attr( "class", "entries" );
+			
+		}
+		
+		entries = perspectives.select( "g.entries" ).selectAll( "g.entry" )
 			.data( function( d ) { 
 				
 				return d.filter( function(d) { return ! isNaN( d.x ); } ); 
@@ -178,29 +185,6 @@ function update() {
 			
 		entriesEnter.append( "circle" )
 			.attr( "class", "entry" );
-			
-		var entriesEnterLabels = entriesEnter.append( "g" )
-			.attr( "class", "label" );
-			
-		entriesEnterLabels.append( "text" );
-		
-		entries.select( "g.label" )
-			.attr( "transform", function( d ) { 
-				
-				return "translate( " + d.x + ", " + d.y + " )";
-				
-			} )
-		.select( "text" )
-			.attr( "y", function( d ) {
-				
-				return -d.r - 10;
-				
-			} )
-			.html( function( d ) {
-				
-				return d.title;
-				
-			} );
 			
 		entries.on( "mouseover", function( d ) {
 				
@@ -252,7 +236,9 @@ function update() {
 				d3.select( this ).classed( "selected", true );
 				
 				highlightIncoming( d );
-				highlightConnections( d );			
+				highlightConnections( d );
+				
+				updateLabels();
 				
 			} )
 			.on( "mouseout", function( d ) { 
@@ -260,7 +246,14 @@ function update() {
 				d.selected = false; // TODO for all
 				
 				d3.selectAll( ".selected" )
+					.attr( "data-d", function ( d ) {
+						
+						d.selected = false;
+						
+					} )
 					.classed( "selected", false );
+					
+				updateLabels();
 				
 			} );
 		
@@ -287,6 +280,88 @@ function update() {
 
 	}
 	
+	function updateLabels() {
+		
+		// TODO: make customisable
+		
+		var lineHeight = 12,
+			w = 150,
+			y = 20,
+			prevX = false,
+			prevIndex = 0,
+			indexBreak = 10;
+		
+		if ( perspectives.selectAll( "g.labels" ).empty() ) {
+			
+			perspectives.append( "g" )
+				.attr( "class", "labels" );
+			
+		}
+				
+		labels = perspectives.select( "g.labels" ).selectAll( "g.label" )
+			.data( function( d ) { 
+				d.sort( function ( a, b ) { return b.x - a.x; } );
+				return d.filter( function(d) { return d.selected; } ); 
+				
+			} );
+			
+		var labelsEnter = labels.enter()
+			.append( "g" )
+			.attr( "class", "label" );			
+			
+		labelsEnter.append( "text" )
+			.html( function( d ) {
+				
+				return d.title;
+				
+			} );
+			
+		labelsEnter.append( "line" );
+			
+		labels.select( "text" )
+			.attr( "x", function(d, i) {
+				
+				return d.x;
+				
+			} )
+			.attr( "y", function(d, i) {
+				
+			if ( i === 0 || prevX - d.x > w || prevIndex > indexBreak ) {
+				
+				d.labelY = d.y -y;
+				prevIndex = 1;
+				
+			} else {
+				
+				d.labelY = -y - lineHeight * prevIndex;
+				prevIndex ++;
+				
+			}
+			
+			prevX = d.x;
+			
+			return d.labelY;
+						
+			
+			/*
+
+						return d.labelY + p.view.works.y > lineHeight * 2 ? d.labelY : -d.labelY - y;
+						
+						
+			*/
+				
+			} );
+			
+		labels.select( "line" )
+			.attr( "x1", function( d ) { return d.x; } )
+			.attr( "x2", function( d ) { return d.x; } )
+			.attr( "y1", function ( d ) { return d.y; } )
+			.attr( "y2", function ( d ) { return d.labelY + lineHeight / 2; } );
+
+		labels.exit().remove();
+		
+	}
+	
 	function updatePerspectives() {
 			
 		perspectives = p.container.selectAll( ".perspective" )
@@ -309,7 +384,8 @@ function update() {
 	
 	updatePerspectives();
 	updateAxes();
-	updateEntries();			
+	updateEntries();
+	updateLabels();
 	updateConnections();
 		
 }
