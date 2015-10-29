@@ -60,6 +60,7 @@ function make() {
 	p.layout.data( dataset );
 	
 	p.layout.objects = p.layout.add()	
+		.caption( "Objects" )
 		.nest( function( d ) {
 
 			return d.fields.object;
@@ -83,6 +84,7 @@ function make() {
 		.width( p.view.width );
 	
 	p.layout.artists = p.layout.add()	
+		.caption( "Artists" )
 		.nest( function( d ) {
 
 			return d.fields.artist;
@@ -105,7 +107,8 @@ function make() {
 		.radius( p.radiusRange )
 		.width( p.view.width );
 		
-	p.layout.places = p.layout.add()	
+	p.layout.places = p.layout.add()
+		.caption( "Places" )
 		.nest( function( d ) {
 
 			return d.fields.place;
