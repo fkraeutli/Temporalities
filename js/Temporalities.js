@@ -88,6 +88,21 @@ Temporalities = function() {
 		
 	};
 	
+	this.captions = function() {
+		
+		var captions = [];
+		
+		for( var i = 0; i < sets.length; i++ ) {
+		
+			captions.push( sets[ i ].caption() );
+			
+		}
+		
+		return captions;
+		
+	};
+	
+	
 	this.data = function( _x ) {
 			
 		if ( ! arguments.length ) return data;
