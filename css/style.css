@@ -18,13 +18,14 @@ text {
   -moz-transition: 0.2s all linear;
   -o-transition: 0.2s all linear;
 }
-.entry.selected g.connections path.selected {
+.entry g.connections path.selected {
   transition: 0.2s all linear;
   -webkit-transition: 0.2s all linear;
   -moz-transition: 0.2s all linear;
   -o-transition: 0.2s all linear;
   stroke: white;
-  opacity: .5;
+  stroke-width: 1.5;
+  opacity: .7;
   z-index: 100;
 }
 .entry circle.entry {
@@ -44,6 +45,9 @@ text {
   stroke-width: 2px;
   fill: none;
   opacity: .2;
+}
+.label {
+  pointer-events: none;
 }
 .label line {
   stroke: orange;

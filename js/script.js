@@ -1,4 +1,6 @@
-
+// FIXME
+var matchingThreshold = 1,
+	labelThreshold = 0;
 
 function update() {
 	
@@ -93,6 +95,7 @@ function update() {
 					 
 					var d = d3.select( this.parentNode.parentNode ).datum();
 					
+					
 					return d.connections && d.connections.length ? d.connections : []; 
 					
 			} );
@@ -101,6 +104,13 @@ function update() {
 			.append( "path" );
 			
 		connections
+			.classed( "selected", function( d ) {
+				
+				if ( d.target.selected && d3.select( this.parentNode.parentNode ).datum().selected ) return true;
+				
+				return false;
+				
+			} )
 			.transition()
 			.duration( 1000 )
 			.attr( "d", function ( d ) {
@@ -138,9 +148,11 @@ function update() {
 				return lineFunction( [ from, via1, via2, to ] );
 				
 			} )
-			.attr( "class", function( d ) {
+			.attr( "id", function( d ) {
 				
-				return "connection_" + d.target.key.replace( /\W+/g, "" );
+				var p = d3.select( this.parentNode.parentNode ).datum();
+				
+				return "connection_" + p.key.replace( /\W+/g, "" ) + "_" +  d.target.key.replace( /\W+/g, "" );
 				
 			} );
 		
@@ -188,69 +200,187 @@ function update() {
 			
 		entries.on( "mouseover", function( d ) {
 				
+				originIDs = [];
+				
+				for( var i = 0; i < d.values.length; i++ ) {
+					
+					originIDs.push( d.values[ i ].MT_uniqueID );
+					
+				}
+				
 				function highlightConnections( d ) {
 					
-					if ( d.connections && d.connections.length ) {
-						for ( var i = 0; i < d.connections.length; i++ ) {
-					
-							var targetId = d.connections[ i ].target.key.replace(/\W+/g, "");
-					
-							d.connections[ i ].target.selected = true;
-					
-							d3.select( "#entry_" + d.connections[ i ].target.set_id + "_" + targetId)
-							.classed( "selected", true );
+					function highlightChild( record ) {
+						
+							for ( var i = 0; i < record.connections.length; i++ ) {
+								
+								var thisIDs = [];
+								
+								for ( var j = 0; j < record.connections[ i ].target.values.length; j++ ) {
+									
+									var value = record.connections[ i ].target.values[ j ];
+									
+									if ( originIDs.indexOf( value.MT_uniqueID ) !== -1 ) {
+										
+										record.connections[ i ].target.selected = true;
+										
+										if ( thisIDs.indexOf( value.MT_uniqueID ) == -1 ) {
+											
+											thisIDs.push( value.MT_uniqueID );
+											
+										}
+										
+										if ( record.connections[ i ].target.connections ) {
+										
+											highlightChild( record.connections[ i ].target );
+											
+										} 
+										
+									}
+									
+								}
+								
+								for( var k = 0; k < originIDs.length; k++ ) {
+									
+									if ( thisIDs.indexOf( originIDs[ k ] ) !== -1 ) {
+										
+										thisIDs.splice( thisIDs.indexOf( originIDs[ k ] ), 1 );
+										
+									}
+									
+								}
+								
+								if ( thisIDs.length === 0 && record.connections[ i ].target.selected ) {
+									
+									record.connections[ i ].target.match = 1;
+									
+								}							
 							
-							d3.select( "#" + getEntryId( d ) + " .connection_" + targetId ).classed( "selected", true );
-							
-							highlightConnections( d.connections[ i ].target );
-							
-						}	
+							}
+						
 					}
+					
+					if ( d.connections && d.connections.length ) {
+						
+						for ( var i = 0; i < d.connections.length; i++ ) {
+							
+							d.connections[ i ].target.selected = true;
+							
+							if ( d.connections[ i ].target.connections ) {
+							
+								highlightChild( d.connections[ i ].target );
+								
+							}
+						
+						}
+					}
+					
 				}
 				
 				function highlightIncoming( d ) {
 					
-					if ( d.incoming && d.incoming.length ) {
-					
-						for ( var i = 0; i < d.incoming.length; i++ ) {
+					function highlightChild( record ) {
 						
-							var targetId = d.incoming[ i ].key.replace(/\W+/g, "");
-						
-							d.incoming[ i ].selected = true;
-						
-							d3.select( "#entry_" + d.incoming[ i ].set_id + "_" + targetId )
-								.classed( "selected", true );
+							for ( var i = 0; i < record.incoming.length; i++ ) {
 								
-							d3.select( "#" + getEntryId( d.incoming[ i ] ) + " .connection_" + d.key.replace(/\W+/g, "") ).classed( "selected", true );
+								var thisIDs = [];
 								
-							highlightIncoming( d.incoming[ i ] );
+								for ( var j = 0; j < record.incoming[ i ].values.length; j++ ) {
+									
+									var value = record.incoming[ i ].values[ j ];
+								
+									if ( thisIDs.indexOf( value.MT_uniqueID ) == -1 ) {
+										
+										thisIDs.push( value.MT_uniqueID );
+										
+									}
+										
+									if ( originIDs.indexOf( value.MT_uniqueID ) !== -1 ) {
+										
+										record.incoming[ i ].selected = true;
+										
+										if ( record.incoming[ i ].incoming ) {
+										
+											highlightChild( record.incoming[ i ] );
+											
+										} 
+										
+									}
+									
+								}
+								
+								for( var k = 0; k < originIDs.length; k++ ) {
+									
+									if ( thisIDs.indexOf( originIDs[ k ] ) !== -1 ) {
+										
+										thisIDs.splice( thisIDs.indexOf( originIDs[ k ] ), 1 );
+										
+									}
+									
+								}
+																
+								if ( thisIDs.length === 0 && record.incoming[ i ].selected ) {
+									
+									record.incoming[ i ].match = 1;
+									
+								}							
 							
-						}
+							}
 						
+					}
+		
+					if ( d.incoming && d.incoming.length ) {
+						
+						for ( var i = 0; i < d.incoming.length; i++ ) {
+							
+							d.incoming[ i ].selected = true;
+							
+							if ( d.incoming[ i ].incoming ) {
+							
+								highlightChild( d.incoming[ i ] );
+								
+							}
+
+						
+						}
 					}
 					
 				}
 				
 				d.selected = true; // TODO for all
+				d.match = 1;
 				
 				d3.select( this ).classed( "selected", true );
 				
-				highlightIncoming( d );
 				highlightConnections( d );
+				highlightIncoming( d );
 				
 				updateLabels();
+				updateConnections();
+				
+				d3.selectAll( ".entry" )					
+					.classed( "selected", function( d ) {
+						
+						return d.match;
+						
+					} );
+
 				
 			} )
-			.on( "mouseout", function( d ) { 
+			.on( "mouseout", function( d ) {
 				
-				d.selected = false; // TODO for all
+				d.selected = false;
 				
-				d3.selectAll( ".selected" )
+				d3.selectAll( ".entry" )
 					.attr( "data-d", function ( d ) {
 						
+						d.match = 0;
 						d.selected = false;
 						
 					} )
+					.classed( "selected", false );
+					
+				d3.selectAll( ".connections .selected" )
 					.classed( "selected", false );
 					
 				updateLabels();
@@ -299,9 +429,10 @@ function update() {
 		}
 				
 		labels = perspectives.select( "g.labels" ).selectAll( "g.label" )
-			.data( function( d ) { 
+			.data( function( d ) {
+				
 				d.sort( function ( a, b ) { return b.x - a.x; } );
-				return d.filter( function(d) { return d.selected; } ); 
+				return d.filter( function(d) { return d.selected && d.match >= labelThreshold; } ); 
 				
 			} );
 			

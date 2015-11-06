@@ -21,6 +21,10 @@ var p = {
 	
 };
 
+var timeScale = d3.time.scale()
+				.domain( [ new Date( 1400, 0, 1 ), new Date( 2016, 0, 1 ) ] )
+				.range( [ 0, p.view.width ] );
+
 d3.json( "../va/objects.js", function( data ) { 
 	
 	dataset = [];
@@ -80,6 +84,7 @@ function make() {
 			}
 			
 		)
+		.scale( timeScale )
 		.radius( p.radiusRange )
 		.width( p.view.width );
 	
@@ -104,6 +109,7 @@ function make() {
 			}
 			
 		)
+		.scale( timeScale )
 		.radius( p.radiusRange )
 		.width( p.view.width );
 		
@@ -128,6 +134,7 @@ function make() {
 			}
 			
 		)
+		.scale( timeScale )
 		.radius( p.radiusRange )
 		.width( p.view.width );
 				
@@ -156,6 +163,7 @@ function make() {
 			}
 			
 		)
+		.scale( timeScale )
 		.radius( p.radiusRange )
 		.width( p.view.width );
 						

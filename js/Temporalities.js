@@ -102,12 +102,19 @@ Temporalities = function() {
 		
 	};
 	
-	
 	this.data = function( _x ) {
 			
 		if ( ! arguments.length ) return data;
 		
 		data = _x;
+		
+		var uniqueID = 0;
+		
+		for ( var i = 0; i < data.length; i++ ) {
+			
+			data[i].MT_uniqueID = uniqueID++;
+			
+		}
 		
 		this.flagUpdated();
 		
