@@ -45,6 +45,9 @@ text {
   fill: none;
   opacity: .2;
 }
+.label {
+  pointer-events: none;
+}
 .label line {
   stroke: orange;
 }
