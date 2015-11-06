@@ -210,109 +210,96 @@ function update() {
 				
 				function highlightConnections( d ) {
 					
-					if ( d.connections && d.connections.length ) {
-						for ( var i = 0; i < d.connections.length; i++ ) {
-					
-							var targetId = d.connections[ i ].target.key.replace(/\W+/g, "");
-					
-							d.connections[ i ].target.selected = true;
-												
-							d3.select( "#entry_" + d.connections[ i ].target.set_id + "_" + targetId)
-								.style( "data", function( d ) { 
-									
-									var thisIDs = [];
-									var matches = 0;
-									
-									for( var i = 0; i < d.values.length; i++ ) {
-					
-										if ( thisIDs.indexOf( d.values[ i ].MT_uniqueID ) == -1 && originIDs.indexOf( d.values[ i ].MT_uniqueID ) !== -1 ) {
-											
-											thisIDs.push( d.values[ i ].MT_uniqueID );
-											
-											matches++;
-											
-										}					
-									}
-									
-									d.match = matches / d.values.length;
-									d.thisIDs = thisIDs;
-									
-								} )
-								.classed( "selected", function( d ) { 
-									
-									if ( d.match >= matchingThreshold ) {
-										
-										return true;
-									}
-									
-									return false;
-									
-								} );
-							
-							d3.select( "#" + getEntryId( d ) + " .connection_" + targetId ).classed( "selected", true );
-							
-							if ( d.match >= 1  ) {
+					function highlightChild( record ) {
+						
+							for ( var i = 0; i < record.connections.length; i++ ) {
 								
-								highlightConnections( d.connections[ i ].target );
+								for ( var j = 0; j < record.connections[ i ].target.values.length; j++ ) {
+									
+									var value = record.connections[ i ].target.values[ j ];
+									
+									if ( originIDs.indexOf( value.MT_uniqueID ) !== -1 ) {
+										
+										record.connections[ i ].target.selected = true;
+										
+										if ( record.connections[ i ].target.connections ) {
+										
+											highlightChild( record.connections[ i ].target );
+											
+										} 
+										
+										break;
+										
+									}
+									
+								}							
+							
+							}
+						
+					}
+					
+					if ( d.connections && d.connections.length ) {
+						
+						for ( var i = 0; i < d.connections.length; i++ ) {
+							
+							d.connections[ i ].target.selected = true;
+							
+							if ( d.connections[ i ].target.connections ) {
+							
+								highlightChild( d.connections[ i ].target );
 								
 							}
-							
-						}	
+						
+						}
 					}
+					
 				}
 				
 				function highlightIncoming( d ) {
 					
-					if ( d.incoming && d.incoming.length ) {
-					
-						for ( var i = 0; i < d.incoming.length; i++ ) {
+					function highlightChild( record ) {
 						
-							var targetId = d.incoming[ i ].key.replace(/\W+/g, "");
-						
-							d.incoming[ i ].selected = true;
-						
-							d3.select( "#entry_" + d.incoming[ i ].set_id + "_" + targetId )			
-								.style( "data", function( d ) { 
+							for ( var i = 0; i < record.incoming.length; i++ ) {
+								
+								for ( var j = 0; j < record.incoming[ i ].values.length; j++ ) {
 									
-									var thisIDs = [];
-									var matches = 0;
-				
-									for( var i = 0; i < d.values.length; i++ ) {
-					
-										if ( thisIDs.indexOf( d.values[ i ].MT_uniqueID ) == -1 && originIDs.indexOf( d.values[ i ].MT_uniqueID ) !== -1 ) {
-											
-											thisIDs.push( d.values[ i ].MT_uniqueID );
-											
-											matches++;
-											
-										}					
-									}
+									var value = record.incoming[ i ].values[ j ];
 									
-									d.match = matches / d.values.length;
-									
-									
-								} )
-								.classed( "selected", function( d ) {
-									
-									if ( d.match >= matchingThreshold ) {
+									if ( originIDs.indexOf( value.MT_uniqueID ) !== -1 ) {
 										
-										return true;
+										record.incoming[ i ].selected = true;
+										
+										if ( record.incoming[ i ].incoming ) {
+										
+											highlightChild( record.incoming[ i ] );
+											
+										} 
+										
+										break;
+										
 									}
 									
-									return false;
-									
-								} );
-								
-							d3.select( "#" + getEntryId( d.incoming[ i ] ) + " .connection_" + d.key.replace(/\W+/g, "") ).classed( "selected", true );
+								}							
 							
-							if ( d.match >= 1 ) {
-								
-								highlightIncoming( d.incoming[ i ] );
+							}
+						
+					}
+		
+					
+					if ( d.incoming && d.incoming.length ) {
+						
+						for ( var i = 0; i < d.incoming.length; i++ ) {
+							
+							d.incoming[ i ].selected = true;
+							
+							if ( d.incoming[ i ].incoming ) {
+							
+								highlightChild( d.incoming[ i ] );
 								
 							}
-							
-						}
+
 						
+						}
 					}
 					
 				}
@@ -322,8 +309,8 @@ function update() {
 				
 				d3.select( this ).classed( "selected", true );
 				
-				highlightIncoming( d );
 				highlightConnections( d );
+				highlightIncoming( d );
 				
 				updateLabels();
 				updateConnections();
