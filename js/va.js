@@ -7,7 +7,7 @@ var p = {
 	view: {
 		
 		width: 1600,
-		height: 800,
+		height: 1200,
 		
 		padding: 50,
 		
@@ -124,6 +124,34 @@ function make() {
 			function( d ) {
 				
 				return d.fields.place;
+				
+			}
+			
+		)
+		.radius( p.radiusRange )
+		.width( p.view.width );
+				
+	p.layout.collections = p.layout.add()
+		.caption( "Collections" )
+		.nest( function( d ) {
+
+			if ( ! d.fields.collections || ! d.fields.collections.length ) return false;
+
+			return d.fields.collections[0].fields.code;
+
+		} )
+		.date( function( d )  {
+			
+			return new Date( d.fields.date_start.valueOf() + ( d.fields.date_end.valueOf() - d.fields.date_start.valueOf() ) / 2 );
+			
+		} )
+		.title(
+			
+			function( d ) {
+				
+				if ( ! d.fields.collections || ! d.fields.collections.length ) return false;
+				
+				return d.fields.collections[0].fields.name;
 				
 			}
 			

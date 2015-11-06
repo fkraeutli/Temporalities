@@ -394,17 +394,7 @@ function make() {
 			if ( d.procedure_begin.length <= 4 ) return new Date( +d.procedure_begin, 0, 1 );
 		
 			var date = d.procedure_begin.split( "/" );
-
-			if ( typeof prevDate === "undefined" || prevDate != d.procedure_begin) {
-	
-				console.log( d.procedure_begin );
-				console.log( new Date( date[2], date[1], date[0] ) );
-				console.log("---");		
-				
-			}
-			
-			prevDate = d.procedure_begin;
-			
+						
 			return new Date( date[2], date[1], date[0] );
 			
 		} )
