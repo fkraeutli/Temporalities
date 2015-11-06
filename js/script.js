@@ -95,6 +95,7 @@ function update() {
 					 
 					var d = d3.select( this.parentNode.parentNode ).datum();
 					
+					
 					return d.connections && d.connections.length ? d.connections : []; 
 					
 			} );
@@ -103,6 +104,13 @@ function update() {
 			.append( "path" );
 			
 		connections
+			.classed( "selected", function( d ) {
+				
+				if ( d.target.selected && d3.select( this.parentNode.parentNode ).datum().selected ) return true;
+				
+				return false;
+				
+			} )
 			.transition()
 			.duration( 1000 )
 			.attr( "d", function ( d ) {
@@ -140,9 +148,11 @@ function update() {
 				return lineFunction( [ from, via1, via2, to ] );
 				
 			} )
-			.attr( "class", function( d ) {
+			.attr( "id", function( d ) {
 				
-				return "connection_" + d.target.key.replace( /\W+/g, "" );
+				var p = d3.select( this.parentNode.parentNode ).datum();
+				
+				return "connection_" + p.key.replace( /\W+/g, "" ) + "_" +  d.target.key.replace( /\W+/g, "" );
 				
 			} );
 		
@@ -223,7 +233,6 @@ function update() {
 									}
 									d.match = matches / d.values.length;
 									
-									
 								} )
 								.classed( "selected", function( d ) { 
 									
@@ -303,6 +312,7 @@ function update() {
 				highlightConnections( d );
 				
 				updateLabels();
+				updateConnections();
 				
 			} )
 			.on( "mouseout", function( d ) { 
@@ -316,6 +326,9 @@ function update() {
 						d.selected = false;
 						
 					} )
+					.classed( "selected", false );
+					
+				d3.selectAll( ".connections .selected" )
 					.classed( "selected", false );
 					
 				updateLabels();
