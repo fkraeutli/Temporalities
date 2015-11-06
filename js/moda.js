@@ -36,7 +36,7 @@ var p = {
 	view: {
 		
 		width: 1600,
-		height: 1600,
+		height: 1000,
 		
 		padding: 150,
 		
@@ -308,18 +308,22 @@ function make() {
 		case MODE_INDIVIDUAL:
 	
 			procScale = d3.time.scale()
-				.domain( [ new Date( 1980, 0, 1 ), new Date( 2016, 0, 1 ) ] )
+				.domain( [ new Date( 1980, 0, 1 ), new Date( 2019, 0, 1 ) ] )
 				.range( [ 0, p.view.width ] );
 				
 			objScale = d3.time.scale()
 				.domain( [ new Date( 1800, 0, 1 ), new Date( 2016, 0, 1 ) ] )
 				.range( [ 0, p.view.width ] );
 				
+			catScale = d3.time.scale()
+				.domain( [ new Date( 1860, 0, 1 ), new Date( 2016, 0, 1 ) ] )
+				.range( [ 0, p.view.width ] );
+				
 			break;
 			
 		case MODE_UNIFORM:
 			
-			objScale = procScale = d3.time.scale()
+			objScale = procScale = catScale = d3.time.scale()
 					.domain( [ new Date( 1800, 0, 1 ), new Date( 2020, 0, 1 ) ] )
 					.range( [ 0, p.view.width ] );
 					
@@ -331,7 +335,7 @@ function make() {
 				.domain( [ new Date( 1940, 0, 1 ), new Date( 2040, 0, 1 ) ] )
 				.range( [ 0, p.view.width ] );
 				
-			objScale = d3.time.scale()
+			objScale = catScale = d3.time.scale()
 				.domain( [ new Date( 1800, 0, 1 ), new Date( 1960, 0, 1 ) ] )
 				.range( [ 0, p.view.width ] );
 				
@@ -404,7 +408,7 @@ function make() {
 			}
 			
 		)
-		.scale( objScale )
+		.scale( catScale )
 		.width( p.view.width )
 		.radius( p.radiusRange );
 		

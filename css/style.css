@@ -24,7 +24,8 @@ text {
   -moz-transition: 0.2s all linear;
   -o-transition: 0.2s all linear;
   stroke: white;
-  opacity: .5;
+  stroke-width: 1.5;
+  opacity: .7;
   z-index: 100;
 }
 .entry circle.entry {

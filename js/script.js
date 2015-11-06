@@ -200,7 +200,7 @@ function update() {
 			
 		entries.on( "mouseover", function( d ) {
 				
-				var originIDs = [];
+				originIDs = [];
 				
 				for( var i = 0; i < d.values.length; i++ ) {
 					
@@ -216,22 +216,26 @@ function update() {
 							var targetId = d.connections[ i ].target.key.replace(/\W+/g, "");
 					
 							d.connections[ i ].target.selected = true;
-					
+												
 							d3.select( "#entry_" + d.connections[ i ].target.set_id + "_" + targetId)
 								.style( "data", function( d ) { 
 									
 									var thisIDs = [];
 									var matches = 0;
-				
+									
 									for( var i = 0; i < d.values.length; i++ ) {
 					
-										if (originIDs.indexOf( d.values[ i ].MT_uniqueID ) !== -1 ) {
+										if ( thisIDs.indexOf( d.values[ i ].MT_uniqueID ) == -1 && originIDs.indexOf( d.values[ i ].MT_uniqueID ) !== -1 ) {
+											
+											thisIDs.push( d.values[ i ].MT_uniqueID );
 											
 											matches++;
 											
 										}					
 									}
+									
 									d.match = matches / d.values.length;
+									d.thisIDs = thisIDs;
 									
 								} )
 								.classed( "selected", function( d ) { 
@@ -247,7 +251,11 @@ function update() {
 							
 							d3.select( "#" + getEntryId( d ) + " .connection_" + targetId ).classed( "selected", true );
 							
-							highlightConnections( d.connections[ i ].target );
+							if ( d.match >= 1  ) {
+								
+								highlightConnections( d.connections[ i ].target );
+								
+							}
 							
 						}	
 					}
@@ -271,12 +279,15 @@ function update() {
 				
 									for( var i = 0; i < d.values.length; i++ ) {
 					
-										if (originIDs.indexOf( d.values[ i ].MT_uniqueID ) !== -1 ) {
+										if ( thisIDs.indexOf( d.values[ i ].MT_uniqueID ) == -1 && originIDs.indexOf( d.values[ i ].MT_uniqueID ) !== -1 ) {
+											
+											thisIDs.push( d.values[ i ].MT_uniqueID );
 											
 											matches++;
 											
 										}					
 									}
+									
 									d.match = matches / d.values.length;
 									
 									
@@ -293,9 +304,12 @@ function update() {
 								} );
 								
 							d3.select( "#" + getEntryId( d.incoming[ i ] ) + " .connection_" + d.key.replace(/\W+/g, "") ).classed( "selected", true );
-
+							
+							if ( d.match >= 1 ) {
 								
-							highlightIncoming( d.incoming[ i ] );
+								highlightIncoming( d.incoming[ i ] );
+								
+							}
 							
 						}
 						
