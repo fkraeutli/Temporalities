@@ -1,4 +1,6 @@
-
+// FIXME
+var matchingThreshold = 1,
+	labelThreshold = 0;
 
 function update() {
 	
@@ -188,6 +190,14 @@ function update() {
 			
 		entries.on( "mouseover", function( d ) {
 				
+				var originIDs = [];
+				
+				for( var i = 0; i < d.values.length; i++ ) {
+					
+					originIDs.push( d.values[ i ].MT_uniqueID );
+					
+				}
+				
 				function highlightConnections( d ) {
 					
 					if ( d.connections && d.connections.length ) {
@@ -198,7 +208,33 @@ function update() {
 							d.connections[ i ].target.selected = true;
 					
 							d3.select( "#entry_" + d.connections[ i ].target.set_id + "_" + targetId)
-							.classed( "selected", true );
+								.style( "data", function( d ) { 
+									
+									var thisIDs = [];
+									var matches = 0;
+				
+									for( var i = 0; i < d.values.length; i++ ) {
+					
+										if (originIDs.indexOf( d.values[ i ].MT_uniqueID ) !== -1 ) {
+											
+											matches++;
+											
+										}					
+									}
+									d.match = matches / d.values.length;
+									
+									
+								} )
+								.classed( "selected", function( d ) { 
+									
+									if ( d.match >= matchingThreshold ) {
+										
+										return true;
+									}
+									
+									return false;
+									
+								} );
 							
 							d3.select( "#" + getEntryId( d ) + " .connection_" + targetId ).classed( "selected", true );
 							
@@ -218,10 +254,37 @@ function update() {
 						
 							d.incoming[ i ].selected = true;
 						
-							d3.select( "#entry_" + d.incoming[ i ].set_id + "_" + targetId )
-								.classed( "selected", true );
+							d3.select( "#entry_" + d.incoming[ i ].set_id + "_" + targetId )			
+								.style( "data", function( d ) { 
+									
+									var thisIDs = [];
+									var matches = 0;
+				
+									for( var i = 0; i < d.values.length; i++ ) {
+					
+										if (originIDs.indexOf( d.values[ i ].MT_uniqueID ) !== -1 ) {
+											
+											matches++;
+											
+										}					
+									}
+									d.match = matches / d.values.length;
+									
+									
+								} )
+								.classed( "selected", function( d ) {
+									
+									if ( d.match >= matchingThreshold ) {
+										
+										return true;
+									}
+									
+									return false;
+									
+								} );
 								
 							d3.select( "#" + getEntryId( d.incoming[ i ] ) + " .connection_" + d.key.replace(/\W+/g, "") ).classed( "selected", true );
+
 								
 							highlightIncoming( d.incoming[ i ] );
 							
@@ -232,6 +295,7 @@ function update() {
 				}
 				
 				d.selected = true; // TODO for all
+				d.match = 1;
 				
 				d3.select( this ).classed( "selected", true );
 				
@@ -245,9 +309,10 @@ function update() {
 				
 				d.selected = false; // TODO for all
 				
-				d3.selectAll( ".selected" )
+				d3.selectAll( ".entry" )
 					.attr( "data-d", function ( d ) {
 						
+						d.match = 0;
 						d.selected = false;
 						
 					} )
@@ -299,9 +364,10 @@ function update() {
 		}
 				
 		labels = perspectives.select( "g.labels" ).selectAll( "g.label" )
-			.data( function( d ) { 
+			.data( function( d ) {
+				
 				d.sort( function ( a, b ) { return b.x - a.x; } );
-				return d.filter( function(d) { return d.selected; } ); 
+				return d.filter( function(d) { return d.selected && d.match >= labelThreshold; } ); 
 				
 			} );
 			
