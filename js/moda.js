@@ -391,7 +391,11 @@ function make() {
 			} )
 		.date( function( d )  {
 			
-			return d.procedure_begin.length > 4 ? new Date( d.procedure_begin ) : new Date( +d.procedure_begin, 0, 1 );
+			if ( d.procedure_begin.length <= 4 ) return new Date( +d.procedure_begin, 0, 1 );
+		
+			var date = d.procedure_begin.split( "/" );
+						
+			return new Date( date[2], date[1], date[0] );
 			
 		} )
 		.title(

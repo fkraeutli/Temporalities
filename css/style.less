@@ -15,6 +15,17 @@ text {
 	
 }
 
+.caption {
+	
+	text {
+		
+		fill: lighten( @colorBG, 10% );
+		font-size: 2em;
+		
+	}
+	
+}
+
 .selected {
 	
 	path {
@@ -99,9 +110,11 @@ text {
 
 .label {
 	
+	pointer-events: none;
+	
 	line {
 		
-		stroke: yellow;
+		stroke: orange;
 		
 	}
 	

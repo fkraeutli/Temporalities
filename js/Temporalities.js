@@ -88,6 +88,21 @@ Temporalities = function() {
 		
 	};
 	
+	this.captions = function() {
+		
+		var captions = [];
+		
+		for( var i = 0; i < sets.length; i++ ) {
+		
+			captions.push( sets[ i ].caption() );
+			
+		}
+		
+		return captions;
+		
+	};
+	
+	
 	this.data = function( _x ) {
 			
 		if ( ! arguments.length ) return data;
@@ -212,7 +227,8 @@ Temporalities.set = function() {
 	
 	if( ! Temporalities.set.id ) Temporalities.set.id = 0;
 		
-	var date,
+	var caption,
+		date,
 		nest,
 		radiusRange = [ 2, 10 ],
 		title,
@@ -261,6 +277,15 @@ Temporalities.set = function() {
 		_arrange( data );
 			
 		return data;
+		
+	};
+	
+	me.caption = function( _x ) {
+			
+		if ( ! arguments.length ) return caption;
+		
+		caption = _x;
+		return me;
 		
 	};
 	
