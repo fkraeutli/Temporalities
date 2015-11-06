@@ -377,6 +377,20 @@ function update() {
 			
 		} );
 		
+		captions = p.container.selectAll( "g.caption" )
+			.data( p.layout.captions() );
+			
+		captions.enter()
+			.append( "g" )
+			.attr( "class", "caption" )
+			.attr( "transform", function( d, i ) {
+				
+				return "translate( 20, " + ( i * p.view.perspective.height )  + " )";
+			
+			} )
+		.append( "text" )
+			.html( function( d ) { return d; } );	
+		
 	}
 	
 	var entries,

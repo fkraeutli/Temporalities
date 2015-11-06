@@ -7,6 +7,10 @@ text {
   fill: white;
   pointer-events: none;
 }
+.caption text {
+  fill: #3c3c3c;
+  font-size: 2em;
+}
 .entry.selected circle.entry {
   fill: yellow;
   transition: 0.2s all linear;
