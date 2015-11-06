@@ -125,6 +125,33 @@ function concatenateMoDAdata() {
 			
 		};		
 		
+		var procedureDate;
+		
+		if ( minProcedure.procedure_begin.length <= 4 ) {
+			
+			procedureDate =  new Date( +minProcedure.procedure_begin, 0, 1 );
+		
+		} else {
+		
+			var pDate = minProcedure.procedure_begin.split( "/" );
+			
+			if ( ! pDate[2] ) {
+				
+				pDate[2] = pDate[1];
+				pDate[1] = pDate[0];
+				pDate[0] = 0;
+				
+			}
+			
+			if ( pDate[2].length <= 2) pDate[2] = "20" + pDate[2];
+			
+			procedureDate = new Date( pDate[2], pDate[1], pDate[0] );
+
+						
+		}
+		
+		minProcedure.procedure_date = procedureDate;
+		
 		minProcedures[ minProcedure.procedure_id ] = minProcedure;
 		
 	}
@@ -171,8 +198,6 @@ function concatenateMoDAdata() {
 		
 		
 		minObject.object_date = new Date( date.replace( /\D/g ,"" ), 0, 1) ;
-
-		
 	
 		for( var j = 0; j < object["Procedure ID"].length; j++ ) {
 			
@@ -287,7 +312,7 @@ function make() {
 				.range( [ 0, p.view.width ] );
 				
 			objScale = d3.time.scale()
-				.domain( [ new Date( 1860, 0, 1 ), new Date( 2016, 0, 1 ) ] )
+				.domain( [ new Date( 1800, 0, 1 ), new Date( 2016, 0, 1 ) ] )
 				.range( [ 0, p.view.width ] );
 				
 			break;
@@ -295,7 +320,7 @@ function make() {
 		case MODE_UNIFORM:
 			
 			objScale = procScale = d3.time.scale()
-					.domain( [ new Date( 1860, 0, 1 ), new Date( 2020, 0, 1 ) ] )
+					.domain( [ new Date( 1800, 0, 1 ), new Date( 2020, 0, 1 ) ] )
 					.range( [ 0, p.view.width ] );
 					
 			break;
@@ -307,7 +332,7 @@ function make() {
 				.range( [ 0, p.view.width ] );
 				
 			objScale = d3.time.scale()
-				.domain( [ new Date( 1860, 0, 1 ), new Date( 1960, 0, 1 ) ] )
+				.domain( [ new Date( 1800, 0, 1 ), new Date( 1960, 0, 1 ) ] )
 				.range( [ 0, p.view.width ] );
 				
 			break;
@@ -331,6 +356,7 @@ function make() {
 	
 	///*
 	p.layout.objects = p.layout.add()	
+		.caption( "Objects" )
 		.nest( function( d ) {
 
 			return d.object_id;
@@ -345,7 +371,7 @@ function make() {
 			
 			function( d ) {
 				
-				return d.object_title || d.object_name;
+				return d.object_title || d.object_brief_description || d.object_name;
 				
 			}
 			
@@ -355,9 +381,10 @@ function make() {
 		.radius( p.radiusRange );
 	// */
 	
-	/*
+	///*
 	
 	p.layout.categories = p.layout.add()	
+		.caption( "Categories" )
 		.nest( function( d ) {
 
 			return d.object_category;
@@ -384,6 +411,7 @@ function make() {
 	// */
 				
 	p.layout.procedures = p.layout.add()
+		.caption( "Procedures" )
 		.nest( function( d ) {
 		
 				return d.procedure_id;
@@ -391,11 +419,7 @@ function make() {
 			} )
 		.date( function( d )  {
 			
-			if ( d.procedure_begin.length <= 4 ) return new Date( +d.procedure_begin, 0, 1 );
-		
-			var date = d.procedure_begin.split( "/" );
-						
-			return new Date( date[2], date[1], date[0] );
+			return d.procedure_date;
 			
 		} )
 		.title(
